@@ -8,11 +8,54 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Resource",
+"class": "DialogGraphData",
+"language": "GDScript",
+"path": "res://addons/naive_dialog_plugin/dialog_graph/data_resource/DialogGraphData.gd"
+}, {
+"base": "Reference",
+"class": "DialogGraphDataDef",
+"language": "GDScript",
+"path": "res://addons/naive_dialog_plugin/dialog_graph/data_resource/DialogGraphDataDef.gd"
+}, {
+"base": "Node",
+"class": "DialogGraphNode",
+"language": "GDScript",
+"path": "res://addons/naive_dialog_plugin/dialog_graph/runtime/nodes/DialogGraphNode.gd"
+}, {
+"base": "Node",
+"class": "DialogGraphRuntime",
+"language": "GDScript",
+"path": "res://addons/naive_dialog_plugin/dialog_graph/runtime/DialogGraphRuntime.gd"
+} ]
+_global_script_class_icons={
+"DialogGraphData": "",
+"DialogGraphDataDef": "",
+"DialogGraphNode": "",
+"DialogGraphRuntime": ""
+}
+
 [application]
 
 config/name="Naive Dialog Plugin"
 run/main_scene="res://Test.tscn"
 config/icon="res://icon.png"
+
+[debug]
+
+gdscript/completion/autocomplete_setters_and_getters=true
+gdscript/warnings/unused_argument=false
+gdscript/warnings/unused_signal=false
+gdscript/warnings/return_value_discarded=false
+
+[display]
+
+window/dpi/allow_hidpi=true
+
+[gui]
+
+theme/custom_font="res://font/font_16.tres"
 
 [physics]
 
