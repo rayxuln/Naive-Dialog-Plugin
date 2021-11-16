@@ -4,15 +4,15 @@
 
 [resource]
 script = ExtResource( 1 )
-id_count = 0
+id_count = 1
 databse = {
 }
 root = 0
 id_node_map = {
 0: {
 "_editor_": {
-"min_size": Vector2( 250, 100 ),
-"offset": Vector2( 280, 120 ),
+"min_size": Vector2( 399, 362 ),
+"offset": Vector2( 80, 160 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -57,8 +57,43 @@ id_node_map = {
 "text": "",
 "text_selection": [  ]
 }
+},
+1: {
+"_editor_": {
+"min_size": Vector2( 279, 262 ),
+"offset": Vector2( 540, 160 ),
+"property_list_visible": true
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 1,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": ""
+}
 }
 }
 id_edge_map = {
-0: [  ]
+0: [  ],
+1: [  ]
 }

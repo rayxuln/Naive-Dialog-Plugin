@@ -3,7 +3,7 @@ class_name DialogGraphDataDef
 
 
 enum EditorType {
-	Defualt = 0,
+	Default = 0,
 	MultiTextEditor,
 	StringEditor,
 	BoolEditor,
@@ -27,12 +27,12 @@ func _data_base(data_type_name):
 		'property_map': {
 			'interactable': {
 				'type': TYPE_BOOL,
-				'editor': EditorType.Defualt,
+				'editor': EditorType.Default,
 				'default': true,
 			},
 			'condition': {
 				'type': TYPE_STRING,
-				'editor': EditorType.Defualt,
+				'editor': EditorType.Default,
 				'default': '',
 			},
 		},
@@ -51,9 +51,9 @@ func get_data_def(data_type_name:String):
 		if not p_def.has('type'):
 			if not p_def.has('default'):
 				p_def.default = ''
-			p_def.type = typeof(p_def.defualt)
+			p_def.type = typeof(p_def.default)
 		if not p_def.has('editor'):
-			p_def.editor = EditorType.Defualt
+			p_def.editor = EditorType.Default
 	return data_def
 
 func get_empty_value_by_type(type:int):

@@ -213,7 +213,7 @@ func get_property_editor_prefab_by_property(property:String):
 	var editor_type = property_def.editor
 	
 	# translate default
-	if editor_type == DialogGraphDataDef.EditorType.Defualt and  type_property_default_editor_map.has(property_def.type):
+	if editor_type == DialogGraphDataDef.EditorType.Default and  type_property_default_editor_map.has(property_def.type):
 		editor_type = type_property_default_editor_map[property_def.type]
 	
 	if type_property_editor_map.has(editor_type):

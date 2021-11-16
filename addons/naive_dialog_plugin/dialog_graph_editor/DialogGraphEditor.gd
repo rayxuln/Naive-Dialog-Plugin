@@ -57,7 +57,6 @@ func edit(dialog_graph_data:DialogGraphData):
 	deleted_node_data_stack.clear()
 	update_dialog_graph_data_edit(dialog_graph_data)
 	update_title()
-	print('edit')
 
 func update_title():
 	var res_path := ''
@@ -100,8 +99,6 @@ func save_to(path):
 	edit(ResourceLoader.load(path, '', true))
 
 func on_save():
-	if not is_dirty():
-		return
 	if get_dialog_graph_data().resource_path.empty():
 		error('The path of dialog graph data is not set', false, true)
 		return

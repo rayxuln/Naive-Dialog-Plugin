@@ -18,8 +18,9 @@ func data_text_selection():
 		'text_selection': {
 			'type': TYPE_ARRAY,
 			'type_hint': [TYPE_STRING],
-			'editor': EditorType.Defualt,
+			'editor': EditorType.Default,
 			'default': [],
 		},
+		'condition': 'selection',
 	})
 
