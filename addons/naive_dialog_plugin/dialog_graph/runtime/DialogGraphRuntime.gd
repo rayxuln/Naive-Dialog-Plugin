@@ -48,11 +48,6 @@ func clear_runtime():
 		n.queue_free()
 	id_node_map = {}
 
-func get_edge_list(id):
-	if dialog_graph_data.id_edge_map.has(id):
-		return dialog_graph_data.id_edge_map[id]
-	return null
-
 func create_runtime_node(data:Dictionary):
 	var base_path:String = get_script().resource_path
 	base_path = base_path.get_base_dir()

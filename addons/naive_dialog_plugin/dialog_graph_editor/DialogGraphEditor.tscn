@@ -1,11 +1,84 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/DialogGraphEditor.gd" type="Script" id=1]
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/DialogGraphDataEdit.gd" type="Script" id=2]
 
 [node name="DialogGraphEditor" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_right = 1024.0
+margin_bottom = 30.0
+
+[node name="FileMenuButton" type="MenuButton" parent="VBoxContainer/HBoxContainer"]
+margin_right = 39.0
+margin_bottom = 30.0
+text = "File"
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+margin_left = 43.0
+margin_top = 3.0
+margin_right = 189.0
+margin_bottom = 27.0
+text = "Naive Dialog Plugin"
+
+[node name="DialogGraphDataEdit" type="GraphEdit" parent="VBoxContainer"]
+margin_top = 34.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_vertical = 3
+script = ExtResource( 2 )
+
+[node name="SaveFileDialog" type="FileDialog" parent="."]
+margin_left = 105.0
+margin_top = 77.0
+margin_right = 913.0
+margin_bottom = 541.0
+resizable = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AlertDialog" type="AcceptDialog" parent="."]
+margin_left = 385.0
+margin_top = 228.0
+margin_right = 662.0
+margin_bottom = 339.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="OverrideConfirmationDialog" type="ConfirmationDialog" parent="."]
+margin_left = 275.0
+margin_top = 240.0
+margin_right = 627.0
+margin_bottom = 379.0
+dialog_text = "Current resouce did not save! Do you want to throw it?"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="visibility_changed" from="." to="." method="_on_DialogGraphEditor_visibility_changed"]
+[connection signal="node_dragged" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_node_dragged"]
+[connection signal="popup_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_popup_request"]
+[connection signal="request_create_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_create_node"]
+[connection signal="request_update_edge_list" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_update_edge_list"]
+[connection signal="requst_remove_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_remove_node"]
+[connection signal="requst_resize_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_resize_node"]
+[connection signal="file_selected" from="SaveFileDialog" to="." method="_on_SaveFileDialog_file_selected"]
+[connection signal="confirmed" from="OverrideConfirmationDialog" to="." method="_on_OverrideConfirmationDialog_confirmed"]

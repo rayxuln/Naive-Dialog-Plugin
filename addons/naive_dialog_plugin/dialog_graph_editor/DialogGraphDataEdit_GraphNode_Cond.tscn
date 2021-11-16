@@ -1,0 +1,67 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/DialogGraphDataEdit_GraphNode_Cond.gd" type="Script" id=1]
+
+[sub_resource type="StyleBoxFlat" id=1]
+resource_local_to_scene = true
+content_margin_left = 5.0
+content_margin_right = 5.0
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color( 0.6, 0.6, 0.6, 0 )
+
+[node name="Cond" type="PanelContainer"]
+margin_left = 207.0
+margin_right = 494.0
+margin_bottom = 48.0
+size_flags_horizontal = 3
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 282.0
+margin_bottom = 43.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer"]
+margin_right = 217.0
+margin_bottom = 38.0
+size_flags_horizontal = 3
+clear_button_enabled = true
+placeholder_text = "expression"
+placeholder_alpha = 0.321
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer"]
+margin_left = 221.0
+margin_right = 277.0
+margin_bottom = 38.0
+mouse_filter = 2
+custom_constants/separation = 0
+
+[node name="UpButton" type="Button" parent="HBoxContainer/HBoxContainer"]
+margin_right = 28.0
+margin_bottom = 38.0
+focus_mode = 0
+text = "↑"
+flat = true
+
+[node name="DownButton" type="Button" parent="HBoxContainer/HBoxContainer"]
+margin_left = 28.0
+margin_right = 56.0
+margin_bottom = 38.0
+focus_mode = 0
+text = "↓"
+flat = true
+
+[connection signal="focus_entered" from="HBoxContainer/LineEdit" to="." method="_on_LineEdit_focus_entered"]
+[connection signal="text_changed" from="HBoxContainer/LineEdit" to="." method="_on_LineEdit_text_changed"]
+[connection signal="pressed" from="HBoxContainer/HBoxContainer/UpButton" to="." method="_on_UpButton_pressed"]
+[connection signal="pressed" from="HBoxContainer/HBoxContainer/DownButton" to="." method="_on_DownButton_pressed"]

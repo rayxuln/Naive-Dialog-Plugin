@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource( 1 )
+id_count = -1
 databse = {
 }
 root = 0
