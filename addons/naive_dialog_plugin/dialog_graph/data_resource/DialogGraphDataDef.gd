@@ -4,6 +4,9 @@ class_name DialogGraphDataDef
 
 enum EditorType {
 	Defualt = 0,
+	MultiTextEditor,
+	StringEditor,
+	BoolEditor,
 }
 
 const DATA_DEF_METHOD_PREFIX := 'data_'
@@ -32,7 +35,7 @@ func _data_base(data_type_name):
 func get_data_def(data_type_name:String):
 	var func_name = 'data_%s' % data_type_name
 	var data_def = _data_base(data_type_name)
-	data_def.property_map = call(func_name)
+	data_def.property_map = dic_combine(data_def.property_map, call(func_name))
 	for k in data_def.property_map.keys():
 		var p_def:Dictionary = data_def.property_map[k]
 		if not p_def.has('type'):

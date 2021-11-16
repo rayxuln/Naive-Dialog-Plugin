@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/BoolEditor.gd" type="Script" id=1]
+
+[node name="BoolEditor" type="CheckBox"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -12.0
+margin_top = -16.0
+margin_right = 12.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "On"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="toggled" from="." to="." method="_on_BoolEditor_toggled"]

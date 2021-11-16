@@ -34,6 +34,9 @@ id_node_map = {
 "type": 0
 },
 3: {
+"_editor_": {
+"min_size": Vector2( 250, 100 )
+},
 "condition": "selection",
 "id": 3,
 "interactable": true,
@@ -43,6 +46,9 @@ id_node_map = {
 "type": 1
 },
 4: {
+"_editor_": {
+"min_size": Vector2( 250, 100 )
+},
 "condition": "",
 "id": 4,
 "interactable": true,
@@ -51,6 +57,9 @@ id_node_map = {
 "type": 0
 },
 5: {
+"_editor_": {
+"min_size": Vector2( 250, 100 )
+},
 "condition": "",
 "id": 5,
 "interactable": true,
@@ -63,5 +72,7 @@ id_edge_map = {
 0: 1,
 1: 2,
 2: 3,
-3: [ 4, 5, 0 ]
+3: [ 4, 5, 0 ],
+4: [  ],
+5: [  ]
 }

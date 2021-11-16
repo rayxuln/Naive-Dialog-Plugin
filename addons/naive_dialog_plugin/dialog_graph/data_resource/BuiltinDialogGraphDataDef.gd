@@ -8,7 +8,7 @@ func data_text():
 	return {
 		'text': { # property : { definition }
 			'type': TYPE_STRING,
-			'editor': EditorType.Defualt,
+			'editor': EditorType.MultiTextEditor,
 			'default': '',
 		},
 	}

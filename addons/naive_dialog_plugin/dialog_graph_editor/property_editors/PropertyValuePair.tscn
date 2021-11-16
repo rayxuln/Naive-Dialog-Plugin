@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/PropertyValuePair.gd" type="Script" id=1]
+
+[node name="PropertyValuePair" type="VBoxContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -18.5
+margin_right = 150.0
+margin_bottom = 18.5
+size_flags_horizontal = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+margin_right = 300.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PropertyLabel" type="Label" parent="HBoxContainer2"]
+margin_right = 148.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+valign = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer2"]
+margin_left = 152.0
+margin_right = 300.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+size_flags_vertical = 3

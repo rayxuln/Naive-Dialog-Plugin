@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/MultiTextEditor.gd" type="Script" id=1]
+
+[node name="MultiTextEditor" type="TextEdit"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+draw_tabs = true
+draw_spaces = true
+smooth_scrolling = true
+script = ExtResource( 1 )
+
+[connection signal="text_changed" from="." to="." method="_on_MultiTextEditor_text_changed"]

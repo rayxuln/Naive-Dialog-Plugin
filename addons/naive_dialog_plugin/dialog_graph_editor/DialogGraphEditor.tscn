@@ -63,12 +63,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="OverrideConfirmationDialog" type="ConfirmationDialog" parent="."]
+[node name="DiscardChangesConfirmationDialog" type="ConfirmationDialog" parent="."]
 margin_left = 275.0
 margin_top = 240.0
 margin_right = 627.0
 margin_bottom = 379.0
-dialog_text = "Current resouce did not save! Do you want to throw it?"
+dialog_text = "Current resouce has not saved yet! Do you want to discard it?"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -81,4 +81,4 @@ __meta__ = {
 [connection signal="requst_remove_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_remove_node"]
 [connection signal="requst_resize_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_resize_node"]
 [connection signal="file_selected" from="SaveFileDialog" to="." method="_on_SaveFileDialog_file_selected"]
-[connection signal="confirmed" from="OverrideConfirmationDialog" to="." method="_on_OverrideConfirmationDialog_confirmed"]
+[connection signal="confirmed" from="DiscardChangesConfirmationDialog" to="." method="_on_OverrideConfirmationDialog_confirmed"]

@@ -11,7 +11,7 @@ onready var title_label := $VBoxContainer/HBoxContainer/TitleLabel
 onready var file_menu_button := $VBoxContainer/HBoxContainer/FileMenuButton
 onready var save_file_dialog := $SaveFileDialog
 onready var alert_dialog := $AlertDialog
-onready var override_confirmation_dialog := $OverrideConfirmationDialog
+onready var discard_changes_confirmation_dialog := $DiscardChangesConfirmationDialog
 
 var saved_undoredo_version:int
 
@@ -97,7 +97,7 @@ func save_to(path):
 		error('Can\'t save resource to: %s, code: %s' % [path, err])
 		return
 	saved_undoredo_version = the_plugin.get_undo_redo().get_version()
-	edit(load(path))
+	edit(ResourceLoader.load(path, '', true))
 
 func on_save():
 	if not is_dirty():
@@ -149,7 +149,7 @@ func _undo_remove_node():
 	dialog_graph_data_edit.create_node_with_data(node_data)
 
 func _undo_redo_resize_node(node, min_size):
-	node.rect_min_size = min_size
+	node.rect_size = min_size
 #	var undoredo := the_plugin.get_undo_redo()
 #	undoredo.create_action('Resize Node: \'%s\' - [%s]' % [node.data.def.type, node.data.id])
 #	undoredo.add_do_method(self, '_do_resize_node', node, min_size)
@@ -182,7 +182,7 @@ func _on_file_menu_id_pressed(id:int):
 	match id:
 		FileMenuId.New:
 			if is_dirty():
-				override_confirmation_dialog.popup_centered()
+				discard_changes_confirmation_dialog.popup_centered()
 			else:
 				update_dialog_graph_data_edit(DialogGraphData.new())
 				update_title()
@@ -219,8 +219,15 @@ func _on_SaveFileDialog_file_selected(path: String) -> void:
 	if path.get_extension().empty():
 		path = '%s.%s' % [path, RESOURCE_EXT]
 	if dir.file_exists(path):
-		error('The file: "%s" already exists!' % path, true, false)
-		return
+		var res = ResourceLoader.load(path, '', true)
+		if res and res is DialogGraphData:
+			res = null
+			dir.remove(path)
+			the_plugin.get_editor_interface().get_resource_filesystem().scan()
+			yield(get_tree().create_timer(0.1), 'timeout')
+		else:
+			error('Can\'t override it, because it is not a DialogGraphData! "%s"' % path)
+			return
 	save_to(path)
 
 

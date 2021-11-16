@@ -11,6 +11,7 @@ const BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH := 'res://addons/naive_dialog_plugin/di
 const GraphNodePrefab := preload('./DialogGraphDataEdit_GraphNode.tscn')
 const GraphNodeType := preload('./DialogGraphDataEdit_GraphNode.gd')
 
+
 var dialog_graph_data:DialogGraphData = null
 
 var popup:PopupMenu
@@ -45,7 +46,16 @@ func set_data(d:DialogGraphData):
 	update_content()
 
 func update_content():
-	print(dialog_graph_data.id_edge_map)
+	clear_all_nodes()
+	for n_data in dialog_graph_data.id_node_map.values():
+		create_node_with_exist_data(n_data)
+
+func clear_all_nodes():
+	for id in id_node_map.keys():
+		var n = id_node_map[id]
+		remove_child(n)
+		n.free()
+	id_node_map.clear()
 
 func get_data_def_name_list():
 	var def_script = load(BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH)
@@ -70,9 +80,8 @@ func create_new_node_at(data:Dictionary, offset:Vector2):
 	
 	return create_node_with_data(data)
 
-func create_node_with_data(data:Dictionary):
+func create_node_with_exist_data(data:Dictionary):
 	var id = data.id
-	dialog_graph_data.add_node(data)
 	var node = GraphNodePrefab.instance()
 	if not dialog_graph_data.id_edge_map.has(id):
 		dialog_graph_data.id_edge_map[id] = []
@@ -85,7 +94,7 @@ func create_node_with_data(data:Dictionary):
 		if editor_data.has('offset'):
 			node.offset = editor_data.offset
 		if editor_data.has('min_size'):
-			node.rect_min_size = editor_data.min_size
+			node.rect_size = editor_data.min_size
 	
 	node.connect('close_request', self, '_on_node_request_close', [node])
 	node.connect('resize_request', self, '_on_node_request_resize', [node])
@@ -93,10 +102,16 @@ func create_node_with_data(data:Dictionary):
 	node.connect('request_update_edge_list', self, '_on_node_request_update_edge_list', [node])
 	return id
 
+func create_node_with_data(data:Dictionary):
+	var id = data.id
+	dialog_graph_data.add_node(data)
+	return create_node_with_exist_data(data)
+
 func remove_node(id):
 	var node = id_node_map[id]
 	dialog_graph_data.remove_node(id)
 	node.queue_free()
+	id_node_map.erase(id)
 
 #func connect_node_by_id(from_id, cond, to_id):
 #	var from = id_node_map[from_id]

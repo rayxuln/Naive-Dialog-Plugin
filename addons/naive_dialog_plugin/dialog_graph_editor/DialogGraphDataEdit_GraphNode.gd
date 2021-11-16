@@ -6,6 +6,9 @@ signal request_update_edge_list(old_edge_list, new_edge_list)
 const CondPrefab := preload('./DialogGraphDataEdit_GraphNode_Cond.tscn')
 const CondType := preload('./DialogGraphDataEdit_GraphNode_Cond.gd')
 
+const PropertyValuePairPrefab := preload('./property_editors/PropertyValuePair.tscn')
+const PropertyValuePairType := preload('./property_editors/PropertyValuePair.gd')
+
 var data:Dictionary
 var edge_list:Array
 
@@ -14,6 +17,9 @@ var cond_list := []
 onready var bottom_hbox := $BottomHBoxContainer
 onready var add_cond_button := $BottomHBoxContainer/AddCondButton
 onready var remove_cond_button := $BottomHBoxContainer/RemoveCondButton
+onready var property_list_scroll_container := $VBoxContainer/ScrollContainer
+onready var property_list_check_button := $VBoxContainer/HBoxContainer/PropertyListCheckButton
+onready var property_list_container := $VBoxContainer/ScrollContainer/VBoxContainer
 
 enum SlotId {
 	In = 0,
@@ -27,6 +33,19 @@ enum SlotType {
 
 var slot_in_color := Color.white
 var slot_out_color := Color.white
+
+const StringEditorPrefab := preload('./property_editors/StringEditor.tscn')
+const MultiTextEditorPrefab := preload('./property_editors/MultiTextEditor.tscn')
+const BoolEditorPrefab := preload('./property_editors/BoolEditor.tscn')
+var type_property_default_editor_map := {
+	TYPE_STRING: DialogGraphDataDef.EditorType.StringEditor,
+	TYPE_BOOL: DialogGraphDataDef.EditorType.BoolEditor,
+}
+var type_property_editor_map := {
+	DialogGraphDataDef.EditorType.StringEditor: StringEditorPrefab,
+	DialogGraphDataDef.EditorType.MultiTextEditor: MultiTextEditorPrefab,
+	DialogGraphDataDef.EditorType.BoolEditor: BoolEditorPrefab,
+}
 
 #----- Methods -----
 func set_data(d:Dictionary, e:Array):
@@ -48,13 +67,15 @@ func update_content():
 		count += 1
 	update_remove_cond_button()
 	update_slot_display()
+	update_property_list_check_button()
+	update_property_list()
 	update_size()
 
 func create_cond(id):
 	var n = CondPrefab.instance()
 	n.id = id
 	add_child(n)
-	move_child(bottom_hbox, get_child_count()-1)
+	move_child(n, get_child_count()-3)
 	cond_list.append(n)
 	n.connect('request_selected', self, '_on_cond_request_selected', [n])
 	n.connect('text_changed', self, '_on_cond_text_changed', [n])
@@ -136,6 +157,25 @@ func update_size():
 	rect_size = Vector2.ZERO
 	
 
+func update_property_list_check_button():
+	if data.has('_editor_'):
+		if data['_editor_'].has('property_list_visible'):
+			property_list_check_button.pressed = data['_editor_']['property_list_visible']
+
+func update_property_list():
+	for c in property_list_container.get_children():
+		c.queue_free()
+	
+	for p in data.property_map.keys():
+		var editor = get_property_editor_prefab_by_property(p)
+		if editor:
+			var pair = PropertyValuePairPrefab.instance()
+			property_list_container.add_child(pair)
+			pair.set_property(p)
+			pair.set_editor(editor)
+			editor.set_value(data.property_map[p])
+			editor.connect('value_changed', self, '_on_editor_value_changed', [editor])
+
 func move_cond_up(id):
 	if id == 0:
 		return
@@ -153,6 +193,22 @@ func move_cond_down(id):
 	list.remove(id)
 	list.insert(id+1, edge)
 	emit_signal('request_update_edge_list', edge_list.duplicate(), list)
+
+func get_property_editor_prefab_by_property(property:String):
+	var property_def:Dictionary = data.def.property_map[property]
+	var editor_type = property_def.editor
+	
+	# translate default
+	if editor_type == DialogGraphDataDef.EditorType.Defualt and  type_property_default_editor_map.has(property_def.type):
+		editor_type = type_property_default_editor_map[property_def.type]
+	
+	if type_property_editor_map.has(editor_type):
+		var prefab:PackedScene = type_property_editor_map[editor_type]
+		var editor = prefab.instance()
+		editor.property = property
+		return editor
+	
+	printerr('Unsupported property type: %s, property: %s' % [property_def.type, property])
 #----- Singals -----
 func _on_GraphNode_offset_changed() -> void:
 	if not data.has('_editor_'):
@@ -188,3 +244,14 @@ func _on_cond_request_up(cond):
 
 func _on_cond_request_down(cond):
 	move_cond_down(cond.id)
+
+
+func _on_PropertyListCheckButton_toggled(button_pressed: bool) -> void:
+	property_list_scroll_container.visible = button_pressed
+	if not data.has('_editor_'):
+		data['_editor_'] = {}
+	data._editor_['property_list_visible'] = button_pressed
+	update_size()
+
+func _on_editor_value_changed(v, editor):
+	data.property_map[editor.property] = v
