@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource( 1 )
-id_count = 2
+id_count = 0
 databse = {
 }
 root = 0
@@ -12,11 +12,25 @@ id_node_map = {
 0: {
 "_editor_": {
 "min_size": Vector2( 250, 100 ),
-"offset": Vector2( 200, 100 )
+"offset": Vector2( 280, 120 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": false
+},
+"text_selection": {
+"visible": true
+}
+}
 },
 "condition": "",
 "def": {
 "property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
 "interactable": {
 "default": true,
 "editor": 0,
@@ -38,75 +52,13 @@ id_node_map = {
 },
 "id": 0,
 "property_map": {
+"condition": "",
 "interactable": true,
 "text": "",
 "text_selection": [  ]
-}
-},
-1: {
-"_editor_": {
-"min_size": Vector2( 250, 100 ),
-"offset": Vector2( 100, 260 )
-},
-"condition": "",
-"def": {
-"property_map": {
-"interactable": {
-"default": true,
-"editor": 0,
-"type": 1
-},
-"text": {
-"default": "",
-"editor": 1,
-"type": 4
-},
-"text_selection": {
-"default": [  ],
-"editor": 0,
-"type": 19,
-"type_hint": [ 4 ]
-}
-},
-"type": "text_selection"
-},
-"id": 1,
-"property_map": {
-"interactable": true,
-"text": "",
-"text_selection": [  ]
-}
-},
-2: {
-"_editor_": {
-"min_size": Vector2( 250, 100 ),
-"offset": Vector2( 418, 296 )
-},
-"condition": "",
-"def": {
-"property_map": {
-"interactable": {
-"default": true,
-"editor": 0,
-"type": 1
-},
-"text": {
-"default": "",
-"editor": 1,
-"type": 4
-}
-},
-"type": "text"
-},
-"id": 2,
-"property_map": {
-"interactable": true,
-"text": ""
 }
 }
 }
 id_edge_map = {
-0: [  ],
-1: [  ],
-2: [  ]
+0: [  ]
 }

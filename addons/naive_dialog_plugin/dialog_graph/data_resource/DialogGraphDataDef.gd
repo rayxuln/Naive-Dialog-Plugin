@@ -7,6 +7,7 @@ enum EditorType {
 	MultiTextEditor,
 	StringEditor,
 	BoolEditor,
+	ArrayEditor,
 }
 
 const DATA_DEF_METHOD_PREFIX := 'data_'
@@ -29,6 +30,11 @@ func _data_base(data_type_name):
 				'editor': EditorType.Defualt,
 				'default': true,
 			},
+			'condition': {
+				'type': TYPE_STRING,
+				'editor': EditorType.Defualt,
+				'default': '',
+			},
 		},
 	}
 
@@ -37,9 +43,15 @@ func get_data_def(data_type_name:String):
 	var data_def = _data_base(data_type_name)
 	data_def.property_map = dic_combine(data_def.property_map, call(func_name))
 	for k in data_def.property_map.keys():
-		var p_def:Dictionary = data_def.property_map[k]
+		var p_def = data_def.property_map[k]
+		if not p_def is Dictionary:
+			data_def.property_map[k] = {}
+			data_def.property_map[k].default = p_def
+			p_def = data_def.property_map[k]
 		if not p_def.has('type'):
-			p_def.type = TYPE_STRING
+			if not p_def.has('default'):
+				p_def.default = ''
+			p_def.type = typeof(p_def.defualt)
 		if not p_def.has('editor'):
 			p_def.editor = EditorType.Defualt
 	return data_def

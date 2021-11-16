@@ -1,19 +1,22 @@
 tool
-extends LineEdit
+extends Control
 
 signal value_changed(v)
 
 const PropertyValuePairType := preload('./PropertyValuePair.gd')
 
+var list:Array
+
 #----- Methods -----
 func set_value(v):
-	text = v
+	list = v
 
 func get_value(v):
-	return text
+	return list
 
 func get_layout_type():
-	return PropertyValuePairType.LayoutType.Horizontal
+	return PropertyValuePairType.LayoutType.Vertical
+
+func update_size():
+	rect_size = Vector2.ZERO
 #----- Signals -----
-func _on_StringEditor_text_changed(new_text: String) -> void:
-	emit_signal('value_changed', new_text)

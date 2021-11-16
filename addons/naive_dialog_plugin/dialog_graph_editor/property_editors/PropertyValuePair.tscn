@@ -36,3 +36,12 @@ margin_right = 300.0
 margin_bottom = 37.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="VisibleCheckButton" type="CheckButton" parent="HBoxContainer2/HBoxContainer"]
+visible = false
+margin_right = 148.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+text = "Show"
+
+[connection signal="toggled" from="HBoxContainer2/HBoxContainer/VisibleCheckButton" to="." method="_on_VisibleCheckButton_toggled"]

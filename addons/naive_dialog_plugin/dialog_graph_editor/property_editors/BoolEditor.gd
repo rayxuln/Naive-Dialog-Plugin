@@ -5,8 +5,6 @@ signal value_changed(v)
 
 const PropertyValuePairType := preload('./PropertyValuePair.gd')
 
-var property:String
-
 #----- Methods -----
 func set_value(v):
 	pressed = v

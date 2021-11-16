@@ -37,14 +37,17 @@ var slot_out_color := Color.white
 const StringEditorPrefab := preload('./property_editors/StringEditor.tscn')
 const MultiTextEditorPrefab := preload('./property_editors/MultiTextEditor.tscn')
 const BoolEditorPrefab := preload('./property_editors/BoolEditor.tscn')
+const ArrayEditorPrefab := preload('./property_editors/ArrayEditor.tscn')
 var type_property_default_editor_map := {
 	TYPE_STRING: DialogGraphDataDef.EditorType.StringEditor,
 	TYPE_BOOL: DialogGraphDataDef.EditorType.BoolEditor,
+	TYPE_ARRAY: DialogGraphDataDef.EditorType.ArrayEditor,
 }
 var type_property_editor_map := {
 	DialogGraphDataDef.EditorType.StringEditor: StringEditorPrefab,
 	DialogGraphDataDef.EditorType.MultiTextEditor: MultiTextEditorPrefab,
 	DialogGraphDataDef.EditorType.BoolEditor: BoolEditorPrefab,
+	DialogGraphDataDef.EditorType.ArrayEditor: ArrayEditorPrefab,
 }
 
 #----- Methods -----
@@ -154,7 +157,9 @@ func update_slot_display():
 		set_slot(slot_id, false, SlotType.In, slot_in_color, true, SlotType.Out, slot_out_color)
 
 func update_size():
-	rect_size = Vector2.ZERO
+	if data.has('_editor_'):
+		if data['_editor_'].has('min_size'):
+			rect_size = data._editor_.min_size
 	
 
 func update_property_list_check_button():
@@ -166,6 +171,11 @@ func update_property_list():
 	for c in property_list_container.get_children():
 		c.queue_free()
 	
+	var pm := {}
+	if data.has('_editor_'):
+		if data['_editor_'].has('property_map'):
+				pm = data['_editor_']['property_map']
+	
 	for p in data.property_map.keys():
 		var editor = get_property_editor_prefab_by_property(p)
 		if editor:
@@ -173,8 +183,12 @@ func update_property_list():
 			property_list_container.add_child(pair)
 			pair.set_property(p)
 			pair.set_editor(editor)
+			pair.connect('visible_check_button_toggled', self, '_on_property_visible_check_button_toggled', [pair])
+			if pm.has(p):
+				if pm[p].has('visible'):
+						pair.set_visible_check_button(pm[p].visible)
 			editor.set_value(data.property_map[p])
-			editor.connect('value_changed', self, '_on_editor_value_changed', [editor])
+			editor.connect('value_changed', self, '_on_editor_value_changed', [pair])
 
 func move_cond_up(id):
 	if id == 0:
@@ -205,7 +219,6 @@ func get_property_editor_prefab_by_property(property:String):
 	if type_property_editor_map.has(editor_type):
 		var prefab:PackedScene = type_property_editor_map[editor_type]
 		var editor = prefab.instance()
-		editor.property = property
 		return editor
 	
 	printerr('Unsupported property type: %s, property: %s' % [property_def.type, property])
@@ -219,7 +232,7 @@ func _on_GraphNode_offset_changed() -> void:
 func _on_GraphNode_resized() -> void:
 	if not data.has('_editor_'):
 		data['_editor_'] = {}
-	data._editor_.min_size = rect_min_size
+	data._editor_.min_size = rect_size
 
 
 func _on_AddCondButton_pressed() -> void:
@@ -253,5 +266,14 @@ func _on_PropertyListCheckButton_toggled(button_pressed: bool) -> void:
 	data._editor_['property_list_visible'] = button_pressed
 	update_size()
 
-func _on_editor_value_changed(v, editor):
-	data.property_map[editor.property] = v
+func _on_editor_value_changed(v, pair):
+	data.property_map[pair.property] = v
+
+func _on_property_visible_check_button_toggled(v, pair:PropertyValuePairType):
+	if not data.has('_editor_'):
+		data['_editor_'] = {}
+	if not data._editor_.has('property_map'):
+		data._editor_['property_map'] = {}
+	if not data._editor_.property_map.has(pair.property):
+		data._editor_.property_map[pair.property] = {}
+	data._editor_.property_map[pair.property].visible = v
