@@ -18,8 +18,10 @@ var dialog_graph_data:DialogGraphData = null
 
 var popup:PopupMenu
 var popup_new_name := tr('New')
+var popup_paste_name := tr('Paste')
 enum PopupMenuId {
 	New = 0,
+	Paste,
 }
 var popup_local_mouse_position:Vector2
 
@@ -28,20 +30,45 @@ var popup_new_menu_name := 'new_menu'
 var popup_new_menu_name_list := []
 var popup_new_menu_id_list := []
 
+var node_popup_menu:PopupMenu
+var node_popup_menu_copy_name := tr('Copy')
+var node_popup_menu_delete_name := tr('Delete')
+var node_popup_menu_minimize_name := tr('Minimize')
+enum NodePopupMenuId {
+	Copy = 0,
+	Delete,
+	Minimize,
+}
+
 var id_node_map := {}
 
 func _ready() -> void:
 	create_popup()
+	create_node_popup_menu()
 #----- Methods -----
 func create_popup():
 	popup = PopupMenu.new()
 	add_child(popup)
+	popup.connect('id_pressed', self, '_on_popup_menu_id_pressed')
 	
 	popup_new_menu = PopupMenu.new()
 	popup_new_menu.connect('id_pressed', self, '_on_popup_new_menu_id_pressed')
 	popup.add_child(popup_new_menu)
 	popup_new_menu.name = popup_new_menu_name
 	popup.add_submenu_item(popup_new_name, popup_new_menu_name, PopupMenuId.New)
+	
+	popup.add_separator()
+	popup.add_item(popup_paste_name, PopupMenuId.Paste)
+
+func create_node_popup_menu():
+	node_popup_menu = PopupMenu.new()
+	add_child(node_popup_menu)
+	node_popup_menu.connect('id_pressed', self, '_on_node_popup_menu_id_pressed')
+	
+	node_popup_menu.add_item(node_popup_menu_copy_name, NodePopupMenuId.Copy)
+	node_popup_menu.add_item(node_popup_menu_minimize_name, NodePopupMenuId.Minimize)
+	node_popup_menu.add_separator()
+	node_popup_menu.add_item(node_popup_menu_delete_name, NodePopupMenuId.Delete)
 
 func set_data(d:DialogGraphData):
 	dialog_graph_data = d
@@ -170,19 +197,41 @@ func on_popup_show():
 	for n in get_data_def_name_list():
 		popup_new_menu.add_item(n, count)
 		count += 1
+
+func get_selected_node_list():
+	var res := []
+	for id in id_node_map.keys():
+		var node:GraphNodeType = id_node_map[id]
+		if node.selected:
+			res.append(node)
+	return res
 #----- Signals -----
 func _on_DialogGraphDataEdit_popup_request(position: Vector2) -> void:
-	on_popup_show()
-	
-	popup.popup_centered()
-	popup.rect_position = position
-	popup_local_mouse_position = get_local_mouse_position()
+	var node_list = get_selected_node_list()
+	if node_list.empty():
+		on_popup_show()
+		popup.popup_centered()
+		popup.rect_position = position
+		popup_local_mouse_position = get_local_mouse_position()
+	else:
+		node_popup_menu.popup_centered()
+		node_popup_menu.rect_position = position
 
 func _on_popup_new_menu_id_pressed(id:int):
 	var name_list = get_data_def_name_list()
 	var def_type_name = name_list[id]
 	emit_signal('request_create_node', def_type_name)
 #	create_new_node_at(gen_data_from_data_def_name(def_type_name), popup_local_mouse_position + scroll_offset)
+
+func _on_popup_menu_id_pressed(id:int):
+	match id:
+		PopupMenuId.Paste:
+			var data = str2var(OS.clipboard)
+			if not data or (not data is Dictionary):
+				return
+			if not data.has('dialog_graph_node_data_list_tag'):
+				return
+			print('paste %s' % [data])
 
 func _on_node_request_close(node:GraphNodeType):
 	emit_signal('requst_remove_node', node)
@@ -222,3 +271,27 @@ func _on_DialogGraphDataEdit_disconnection_request(from: String, from_slot: int,
 		var start_id = from_node.get_cond_start_slot()
 		from_cond_id = from_slot - start_id
 	emit_signal('request_disconnect_node', from_node, from_cond_id, to_node)
+
+func _on_node_popup_menu_id_pressed(id:int):
+	match id:
+		NodePopupMenuId.Copy:
+			var node_list = get_selected_node_list()
+			if node_list.empty():
+				return
+			var node_data_list := []
+			for node in node_list:
+				var data := {
+					'dialog_graph_node_data_list_tag': true,
+					'data': node.data,
+					'edge_list': node.edge_list,
+				}
+				node_data_list.append(data)
+			OS.clipboard = var2str(node_data_list)
+		NodePopupMenuId.Delete:
+			var node_list = get_selected_node_list()
+			for n in node_list:
+				emit_signal('requst_remove_node', n)
+		NodePopupMenuId.Minimize:
+			var node_list = get_selected_node_list()
+			for n in node_list:
+				n.rect_size = Vector2.ZERO
