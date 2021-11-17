@@ -4,16 +4,15 @@
 
 [resource]
 script = ExtResource( 1 )
-id_count = 6
+id_count = 7
 databse = {
-"selection": 0
 }
 root = 0
 id_node_map = {
 0: {
 "_editor_": {
-"min_size": Vector2( 426.994, 404 ),
-"offset": Vector2( 100, 120 ),
+"min_size": Vector2( 504.005, 446 ),
+"offset": Vector2( 500, 60 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -21,7 +20,6 @@ id_node_map = {
 }
 }
 },
-"condition": "",
 "def": {
 "property_map": {
 "condition": {
@@ -33,6 +31,11 @@ id_node_map = {
 "default": true,
 "editor": 0,
 "type": 1
+},
+"speaker": {
+"default": "",
+"editor": 0,
+"type": 4
 },
 "text": {
 "default": "",
@@ -46,14 +49,15 @@ id_node_map = {
 "property_map": {
 "condition": "",
 "interactable": true,
+"speaker": "???",
 "text": "你好啊"
 },
 "to": 1
 },
 1: {
 "_editor_": {
-"min_size": Vector2( 467.44, 409 ),
-"offset": Vector2( 580, 100 ),
+"min_size": Vector2( 250, 240 ),
+"offset": Vector2( 660, -220 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -61,7 +65,6 @@ id_node_map = {
 }
 }
 },
-"condition": "",
 "def": {
 "property_map": {
 "condition": {
@@ -73,6 +76,11 @@ id_node_map = {
 "default": true,
 "editor": 0,
 "type": 1
+},
+"speaker": {
+"default": "",
+"editor": 0,
+"type": 4
 },
 "text": {
 "default": "",
@@ -86,54 +94,15 @@ id_node_map = {
 "property_map": {
 "condition": "",
 "interactable": true,
-"text": "我是对白"
+"speaker": "我",
+"text": "谁？"
 },
-"to": 2
+"to": 5
 },
-2: {
+5: {
 "_editor_": {
-"min_size": Vector2( 420, 390 ),
-"offset": Vector2( 1140, 100 ),
-"property_list_visible": true,
-"property_map": {
-"text": {
-"visible": true
-}
-}
-},
-"condition": "",
-"def": {
-"property_map": {
-"condition": {
-"default": "",
-"editor": 0,
-"type": 4
-},
-"interactable": {
-"default": true,
-"editor": 0,
-"type": 1
-},
-"text": {
-"default": "",
-"editor": 1,
-"type": 4
-}
-},
-"type": "text"
-},
-"id": 2,
-"property_map": {
-"condition": "",
-"interactable": true,
-"text": "很高兴看到你"
-},
-"to": 3
-},
-3: {
-"_editor_": {
-"min_size": Vector2( 502, 494 ),
-"offset": Vector2( 1620, 0 ),
+"min_size": Vector2( 514, 525 ),
+"offset": Vector2( 1020, -240 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -144,7 +113,6 @@ id_node_map = {
 }
 }
 },
-"condition": "",
 "def": {
 "property_map": {
 "condition": {
@@ -157,33 +125,38 @@ id_node_map = {
 "editor": 0,
 "type": 1
 },
+"speaker": {
+"default": "",
+"editor": 0,
+"type": 4
+},
 "text": {
 "default": "",
 "editor": 1,
 "type": 4
 },
 "text_selection": {
-"default": [ "这到底是什么？", "我还是不问了吧", "..." ],
+"default": [ "有什么特别的吗？", "再见", "..." ],
 "editor": 0,
-"type": 19,
-"type_hint": 4
+"type": 19
 }
 },
 "type": "text_selection"
 },
-"id": 3,
+"id": 5,
 "property_map": {
 "condition": "selection",
 "interactable": true,
-"text": "你想了解些什么呢？",
-"text_selection": [ "这到底是什么？", "我还是不问了吧", "..." ]
+"speaker": "神秘人",
+"text": "我是[color=red]'神秘人'[/color]. 有什么能帮你的吗？",
+"text_selection": [ "有什么特别的吗？", "再见", "..." ]
 },
 "to": -1
 },
-4: {
+6: {
 "_editor_": {
-"min_size": Vector2( 393, 423 ),
-"offset": Vector2( 2180, 60 ),
+"min_size": Vector2( 421, 385 ),
+"offset": Vector2( 1560, -380 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -191,7 +164,6 @@ id_node_map = {
 }
 }
 },
-"condition": "",
 "def": {
 "property_map": {
 "condition": {
@@ -204,6 +176,11 @@ id_node_map = {
 "editor": 0,
 "type": 1
 },
+"speaker": {
+"default": "",
+"editor": 0,
+"type": 4
+},
 "text": {
 "default": "",
 "editor": 1,
@@ -212,18 +189,19 @@ id_node_map = {
 },
 "type": "text"
 },
-"id": 4,
+"id": 6,
 "property_map": {
 "condition": "",
 "interactable": true,
-"text": "随便你吧"
+"speaker": "神秘人",
+"text": "没有..."
 },
-"to": -1
+"to": 5
 },
-5: {
+7: {
 "_editor_": {
-"min_size": Vector2( 367, 248 ),
-"offset": Vector2( 2180, -200 ),
+"min_size": Vector2( 458, 418 ),
+"offset": Vector2( 1560, 40 ),
 "property_list_visible": true,
 "property_map": {
 "text": {
@@ -231,7 +209,6 @@ id_node_map = {
 }
 }
 },
-"condition": "",
 "def": {
 "property_map": {
 "condition": {
@@ -244,6 +221,11 @@ id_node_map = {
 "editor": 0,
 "type": 1
 },
+"speaker": {
+"default": "",
+"editor": 0,
+"type": 4
+},
 "text": {
 "default": "",
 "editor": 1,
@@ -252,11 +234,12 @@ id_node_map = {
 },
 "type": "text"
 },
-"id": 5,
+"id": 7,
 "property_map": {
 "condition": "",
 "interactable": true,
-"text": "这只是个简单的对话编辑器而已"
+"speaker": "神秘人",
+"text": "好吧"
 },
 "to": -1
 }
@@ -264,17 +247,16 @@ id_node_map = {
 id_edge_map = {
 0: [  ],
 1: [  ],
-2: [  ],
-3: [ {
+5: [ {
 "cond": "0",
-"to": 5
+"to": 6
 }, {
 "cond": "1",
-"to": 4
+"to": 7
 }, {
 "cond": "2",
 "to": 0
 } ],
-4: [  ],
-5: [  ]
+6: [  ],
+7: [  ]
 }

@@ -6,6 +6,7 @@ extends DialogGraphDataDef
 #----- Data Definitions -----
 func data_text():
 	return {
+		'speaker': '',
 		'text': { # property : { definition }
 			'type': TYPE_STRING,
 			'editor': EditorType.MultiTextEditor,

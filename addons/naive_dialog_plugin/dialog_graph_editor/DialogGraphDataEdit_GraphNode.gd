@@ -34,7 +34,7 @@ enum SlotType {
 	Out = 0,
 }
 
-var slot_in_color := Color.white
+var slot_in_color := Color.greenyellow
 var slot_out_color := Color.white
 
 var set_as_root_guard := false

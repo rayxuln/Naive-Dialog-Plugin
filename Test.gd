@@ -21,7 +21,7 @@ func _on_StartButton_pressed() -> void:
 func _on_Runtime_request_advance(runtime, current_node) -> void:
 	$Control/Label.visible = true
 	if current_node.data.def.type == 'text':
-		$Control/Label.bbcode_text = '%s' % [current_node.data.property_map.text]
+		$Control/Label.bbcode_text = '[%s]\n%s' % [current_node.data.property_map.speaker, current_node.data.property_map.text]
 	else:
 		var list = current_node.data.property_map.text_selection
 		var msg = ''
@@ -29,7 +29,7 @@ func _on_Runtime_request_advance(runtime, current_node) -> void:
 		for s in list:
 			msg += '[url=%s]%s. %s[/url]\n' % [count, count, s]
 			count += 1
-		$Control/Label.bbcode_text = '%s:\n%s' % [current_node.data.property_map.text, msg]
+		$Control/Label.bbcode_text = '[%s]\n%s:\n%s' % [current_node.data.property_map.speaker, current_node.data.property_map.text, msg]
 	$Control/Label/Tween.stop_all()
 	$Control/Label/Tween.interpolate_property($Control/Label, 'percent_visible', 0, 1, 0.5, Tween.TRANS_CUBIC, Tween.EASE_IN_OUT)
 	$Control/Label/Tween.start()
