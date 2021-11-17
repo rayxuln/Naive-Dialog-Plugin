@@ -11,7 +11,7 @@ var property_def
 func set_value(v):
 	pressed = v
 
-func get_value(v):
+func get_value():
 	return pressed
 
 func get_layout_type():

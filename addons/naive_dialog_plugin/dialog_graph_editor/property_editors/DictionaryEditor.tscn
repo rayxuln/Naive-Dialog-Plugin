@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/DictionaryEditor.gd" type="Script" id=1]
+
+[node name="DictionaryEditor" type="VBoxContainer"]
+margin_right = 876.0
+margin_bottom = 214.0
+rect_min_size = Vector2( 0, 200 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+margin_right = 876.0
+margin_bottom = 176.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+margin_right = 876.0
+margin_bottom = 176.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer/VBoxContainer"]
+margin_right = 876.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_top = 180.0
+margin_right = 876.0
+margin_bottom = 214.0
+
+[node name="KeyLineEdit" type="LineEdit" parent="HBoxContainer"]
+margin_right = 830.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+placeholder_text = "Key"
+
+[node name="AddButton" type="Button" parent="HBoxContainer"]
+margin_left = 834.0
+margin_right = 876.0
+margin_bottom = 34.0
+text = "Add"
+
+[connection signal="pressed" from="HBoxContainer/AddButton" to="." method="_on_AddButton_pressed"]

@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/NumberEditor.gd" type="Script" id=1]
+
+[node name="NumberEditor" type="LineEdit"]
+margin_right = 164.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+placeholder_text = "Number"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="focus_exited" from="." to="." method="_on_NumberEditor_focus_exited"]
+[connection signal="text_entered" from="." to="." method="_on_NumberEditor_text_entered"]

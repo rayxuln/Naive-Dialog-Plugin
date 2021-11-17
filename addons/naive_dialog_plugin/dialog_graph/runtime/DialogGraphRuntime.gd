@@ -82,6 +82,10 @@ func tick():
 	if current_node_waiting_advance:
 		return
 	var data:Dictionary = current_node.data
+	if data.property_map.has('assignment_map'):
+		var map:Dictionary = data.property_map.assignment_map
+		for k in map.keys():
+			database[k] = map[k]
 	if data.property_map.interactable:
 		current_node_waiting_advance = true
 		emit_signal('request_advance', self, current_node)

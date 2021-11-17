@@ -8,20 +8,17 @@ const PropertyValuePairPrefab := preload('./PropertyValuePair.tscn')
 const PropertyEditorDef := preload('./PropertyEditorDef.gd')
 
 onready var list_container := $ScrollContainer/VBoxContainer/VBoxContainer
+onready var key_line_edit := $HBoxContainer/KeyLineEdit
 
 var property_def
-var list:Array
+var map:Dictionary
 
 var item_popup_menu:PopupMenu
 var item_popup_menu_remove_name := tr('Remove')
-var item_popup_menu_insert_above_name := tr('Insert Above')
-var item_popup_menu_insert_below_name := tr('Insert Below')
 enum ItemPopupMenuId {
 	Remove = 0,
-	InsertAbove = 1,
-	InsertBelow = 2,
 }
-var item_popup_menu_item_id := -1
+var item_popup_menu_item = null
 
 func _ready() -> void:
 	create_item_popup_menu()
@@ -29,13 +26,10 @@ func _ready() -> void:
 func create_item_popup_menu():
 	item_popup_menu = PopupMenu.new()
 	item_popup_menu.add_item(item_popup_menu_remove_name, ItemPopupMenuId.Remove)
-	item_popup_menu.add_separator()
-	item_popup_menu.add_item(item_popup_menu_insert_above_name, ItemPopupMenuId.InsertAbove)
-	item_popup_menu.add_item(item_popup_menu_insert_below_name, ItemPopupMenuId.InsertBelow)
 	item_popup_menu.connect('id_pressed', self, '_on_item_popup_menu_id_pressed')
 	add_child(item_popup_menu)
 
-func create_list_item():
+func create_map_item():
 	var item = PanelContainer.new()
 	item.size_flags_horizontal = SIZE_EXPAND_FILL
 	item.size_flags_vertical = SIZE_EXPAND_FILL
@@ -61,44 +55,26 @@ func create_list_item():
 	item.set_meta('pair', property_value_pair)
 	item.set_meta('editor', editor)
 	
-	var hbox2 = HBoxContainer.new()
-	hbox1.add_child(hbox2)
-	
-	var up_button = Button.new()
-	up_button.text = '↑'
-	up_button.flat = true
-	hbox2.add_child(up_button)
-	
-	var down_button = Button.new()
-	down_button.text = '↓'
-	down_button.flat = true
-	hbox2.add_child(down_button)
-	
-	item.set_meta('up_button', up_button)
-	item.set_meta('down_button', down_button)
-	
 	return item
 
-func clear_list_item():
+func clear_map_item():
 	for c in list_container.get_children():
 		c.queue_free()
 
-func update_list():
-	clear_list_item()
-	var count = 0
-	for v in list:
-		var item = create_list_item()
+func update_map():
+	clear_map_item()
+	for k in map.keys():
+		var v = map[k]
+		var item = create_map_item()
 		list_container.add_child(item)
-		item.set_meta('id', count)
-		var up_button:Button = item.get_meta('up_button')
-		up_button.connect('pressed', self, '_on_item_up_button_pressed', [item])
-		var down_button:Button = item.get_meta('down_button')
-		down_button.connect('pressed', self, '_on_item_down_button_pressed', [item])
+		item.set_meta('key', k)
 		var menu_button:Button = item.get_meta('menu_button')
 		menu_button.connect('pressed', self, '_on_item_menu_button_pressed', [item])
 		
 		var pair:PropertyValuePairType = item.get_meta('pair')
-		pair.set_property(str(item.get_meta('id')))
+		pair.set_property(k)
+		pair.connect('request_edit_property', self, '_on_pair_request_edit', [true, pair, item])
+		pair.connect('request_change_property', self, '_on_pair_request_edit', [false, pair, item])
 		
 		var editor = item.get_meta('editor')
 		if editor:
@@ -107,41 +83,21 @@ func update_list():
 			pair.set_editor(editor)
 		else:
 			printerr('Unsupport array type: %s' % get_type_hint())
-		count += 1
 
-func move_up_list_item(id):
-	if id == 0:
-		return
-	var v = list[id]
-	list.remove(id)
-	list.insert(id-1, v)
-	update_list()
-
-func move_down_list_item(id):
-	if id == list.size()-1:
-		return
-	var v = list[id]
-	list.remove(id)
-	list.insert(id+1, v)
-	update_list()
-
-func add_list_item_at(id):
-	list.insert(id, '')
-	update_list()
+func add_map_item_at(id):
+	map[id] = ''
+	update_map()
 	
-func remove_list_item_at(id):
-	list.remove(id)
-	update_list()
-
-func add_list_item_at_end():
-	add_list_item_at(list.size())
+func remove_map_item_at(id):
+	map.erase(id)
+	update_map()
 
 func set_value(v):
-	list = v
-	update_list()
+	map = v
+	update_map()
 
 func get_value():
-	return list
+	return map
 
 func get_layout_type():
 	return PropertyValuePairType.LayoutType.Vertical
@@ -157,31 +113,36 @@ func get_type_hint():
 	return TYPE_STRING
 #----- Signals -----
 func _on_item_value_changed(v, item):
-	list[item.get_meta('id')] = v
-
+	map[item.get_meta('key')] = v
 
 func _on_AddButton_pressed() -> void:
-	add_list_item_at_end()
-
-func _on_item_up_button_pressed(item):
-	move_up_list_item(item.get_meta('id'))
-
-func _on_item_down_button_pressed(item):
-	move_down_list_item(item.get_meta('id'))
+	add_map_item_at(key_line_edit.text)
 
 func _on_item_popup_menu_id_pressed(id:int):
-	if item_popup_menu_item_id < 0 or item_popup_menu_item_id >= list.size():
+	if item_popup_menu_item == null:
 		return
 	match id:
 		ItemPopupMenuId.Remove:
-			remove_list_item_at(item_popup_menu_item_id)
-		ItemPopupMenuId.InsertAbove:
-			add_list_item_at(item_popup_menu_item_id)
-		ItemPopupMenuId.InsertBelow:
-			add_list_item_at(item_popup_menu_item_id+1)
-	item_popup_menu_item_id = -1
+			remove_map_item_at(item_popup_menu_item.get_meta('key'))
+	item_popup_menu_item = null
 
 func _on_item_menu_button_pressed(item):
-	item_popup_menu_item_id = item.get_meta('id')
+	item_popup_menu_item = item
 	item_popup_menu.popup_centered()
 	item_popup_menu.rect_global_position = get_global_mouse_position()
+
+func _on_pair_request_edit(edit_mode, pair:PropertyValuePairType, item):
+	var old_key = pair.property
+	pair.set_edit_mode(edit_mode)
+	var new_key = pair.property
+	if not edit_mode:
+		if old_key == new_key:
+			return
+		if map.has(new_key):
+			printerr('The key: \'%s\' is already exist!' % old_key)
+			pair.property = old_key
+		else:
+			var v = map[old_key]
+			map.erase(old_key)
+			map[new_key] = v
+			update_map()

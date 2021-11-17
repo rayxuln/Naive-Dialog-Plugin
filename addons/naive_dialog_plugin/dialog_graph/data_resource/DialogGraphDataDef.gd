@@ -8,6 +8,8 @@ enum EditorType {
 	StringEditor,
 	BoolEditor,
 	ArrayEditor,
+	DictionaryEditor,
+	NumberEditor,
 }
 
 const DATA_DEF_METHOD_PREFIX := 'data_'

@@ -24,3 +24,10 @@ func data_text_selection():
 		'condition': 'selection',
 	})
 
+func data_assignment():
+	return {
+		'interactable': false,
+		'assignment_map': {
+			'default': {},
+		},
+	}

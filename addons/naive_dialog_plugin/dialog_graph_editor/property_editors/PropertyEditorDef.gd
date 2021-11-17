@@ -4,16 +4,23 @@ var StringEditorPrefab := load(path_combine(get_root_path(), 'StringEditor.tscn'
 var MultiTextEditorPrefab := load(path_combine(get_root_path(), 'MultiTextEditor.tscn'))
 var BoolEditorPrefab := load(path_combine(get_root_path(), 'BoolEditor.tscn'))
 var ArrayEditorPrefab := load(path_combine(get_root_path(), 'ArrayEditor.tscn'))
+var DictionaryEditorPrefab := load(path_combine(get_root_path(), 'DictionaryEditor.tscn'))
+var NumberEditorPrefab := load(path_combine(get_root_path(), 'NumberEditor.tscn'))
 var type_property_default_editor_map := {
 	TYPE_STRING: DialogGraphDataDef.EditorType.StringEditor,
 	TYPE_BOOL: DialogGraphDataDef.EditorType.BoolEditor,
 	TYPE_ARRAY: DialogGraphDataDef.EditorType.ArrayEditor,
+	TYPE_DICTIONARY: DialogGraphDataDef.EditorType.DictionaryEditor,
+	TYPE_INT: DialogGraphDataDef.EditorType.NumberEditor,
+	TYPE_REAL: DialogGraphDataDef.EditorType.NumberEditor,
 }
 var type_property_editor_map := {
 	DialogGraphDataDef.EditorType.StringEditor: StringEditorPrefab,
 	DialogGraphDataDef.EditorType.MultiTextEditor: MultiTextEditorPrefab,
 	DialogGraphDataDef.EditorType.BoolEditor: BoolEditorPrefab,
 	DialogGraphDataDef.EditorType.ArrayEditor: ArrayEditorPrefab,
+	DialogGraphDataDef.EditorType.DictionaryEditor: DictionaryEditorPrefab,
+	DialogGraphDataDef.EditorType.NumberEditor: NumberEditorPrefab,
 }
 
 #----- Methods -----

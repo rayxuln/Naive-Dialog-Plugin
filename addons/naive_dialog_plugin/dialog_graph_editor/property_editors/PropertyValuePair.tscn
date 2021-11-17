@@ -45,9 +45,16 @@ size_flags_vertical = 3
 [node name="PropertyLabel" type="Label" parent="VBoxContainer/HBoxContainer2"]
 margin_right = 145.0
 margin_bottom = 24.0
+mouse_filter = 0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 valign = 1
+
+[node name="PropertyLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer2"]
+visible = false
+margin_right = 145.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2"]
 margin_left = 149.0
@@ -58,9 +65,12 @@ size_flags_vertical = 3
 
 [node name="VisibleCheckButton" type="CheckButton" parent="VBoxContainer/HBoxContainer2/HBoxContainer"]
 visible = false
-margin_right = 148.0
+margin_right = 145.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 text = "Show"
 
+[connection signal="gui_input" from="VBoxContainer/HBoxContainer2/PropertyLabel" to="." method="_on_PropertyLabel_gui_input"]
+[connection signal="focus_exited" from="VBoxContainer/HBoxContainer2/PropertyLineEdit" to="." method="_on_PropertyLineEdit_focus_exited"]
+[connection signal="text_entered" from="VBoxContainer/HBoxContainer2/PropertyLineEdit" to="." method="_on_PropertyLineEdit_text_entered"]
 [connection signal="toggled" from="VBoxContainer/HBoxContainer2/HBoxContainer/VisibleCheckButton" to="." method="_on_VisibleCheckButton_toggled"]

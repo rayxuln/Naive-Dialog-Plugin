@@ -2,11 +2,14 @@ tool
 extends Control
 
 signal visible_check_button_toggled(v)
+signal request_edit_property()
+signal request_change_property()
 
 onready var property_label := $VBoxContainer/HBoxContainer2/PropertyLabel
 onready var editor_container := $VBoxContainer/HBoxContainer2/HBoxContainer
 onready var editor_ext_container := $VBoxContainer
 onready var visible_check_button := $VBoxContainer/HBoxContainer2/HBoxContainer/VisibleCheckButton
+onready var property_line_edit := $VBoxContainer/HBoxContainer2/PropertyLineEdit
 
 enum LayoutType {
 	Horizontal,
@@ -37,7 +40,29 @@ func set_editor(e):
 
 func set_visible_check_button(v:bool):
 	visible_check_button.pressed = v
+	
+func set_edit_mode(b):
+	if b:
+		property_line_edit.text = property
+	else:
+		property = property_line_edit.text
+		property_label.text = property
+	property_line_edit.visible = b
+	property_label.visible = not b
 #----- Signals -----
 func _on_VisibleCheckButton_toggled(button_pressed: bool) -> void:
 	editor.visible = button_pressed
 	emit_signal('visible_check_button_toggled', button_pressed)
+
+
+func _on_PropertyLabel_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.doubleclick:
+			emit_signal('request_edit_property')
+
+
+func _on_PropertyLineEdit_text_entered(new_text: String) -> void:
+	property_line_edit.release_focus()
+
+func _on_PropertyLineEdit_focus_exited() -> void:
+	emit_signal('request_change_property')

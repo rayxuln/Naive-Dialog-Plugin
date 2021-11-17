@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource( 1 )
-id_count = 5
+id_count = 6
 databse = {
 "selection": 0
 }
