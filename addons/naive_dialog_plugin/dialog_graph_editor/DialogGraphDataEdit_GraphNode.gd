@@ -8,6 +8,7 @@ const CondType := preload('./DialogGraphDataEdit_GraphNode_Cond.gd')
 
 const PropertyValuePairPrefab := preload('./property_editors/PropertyValuePair.tscn')
 const PropertyValuePairType := preload('./property_editors/PropertyValuePair.gd')
+const PropertyEditorDef := preload('./property_editors/PropertyEditorDef.gd')
 
 var data:Dictionary
 var edge_list:Array
@@ -33,22 +34,6 @@ enum SlotType {
 
 var slot_in_color := Color.white
 var slot_out_color := Color.white
-
-const StringEditorPrefab := preload('./property_editors/StringEditor.tscn')
-const MultiTextEditorPrefab := preload('./property_editors/MultiTextEditor.tscn')
-const BoolEditorPrefab := preload('./property_editors/BoolEditor.tscn')
-const ArrayEditorPrefab := preload('./property_editors/ArrayEditor.tscn')
-var type_property_default_editor_map := {
-	TYPE_STRING: DialogGraphDataDef.EditorType.StringEditor,
-	TYPE_BOOL: DialogGraphDataDef.EditorType.BoolEditor,
-	TYPE_ARRAY: DialogGraphDataDef.EditorType.ArrayEditor,
-}
-var type_property_editor_map := {
-	DialogGraphDataDef.EditorType.StringEditor: StringEditorPrefab,
-	DialogGraphDataDef.EditorType.MultiTextEditor: MultiTextEditorPrefab,
-	DialogGraphDataDef.EditorType.BoolEditor: BoolEditorPrefab,
-	DialogGraphDataDef.EditorType.ArrayEditor: ArrayEditorPrefab,
-}
 
 #----- Methods -----
 func set_data(d:Dictionary, e:Array):
@@ -210,17 +195,10 @@ func move_cond_down(id):
 
 func get_property_editor_prefab_by_property(property:String):
 	var property_def:Dictionary = data.def.property_map[property]
-	var editor_type = property_def.editor
-	
-	# translate default
-	if editor_type == DialogGraphDataDef.EditorType.Default and  type_property_default_editor_map.has(property_def.type):
-		editor_type = type_property_default_editor_map[property_def.type]
-	
-	if type_property_editor_map.has(editor_type):
-		var prefab:PackedScene = type_property_editor_map[editor_type]
-		var editor = prefab.instance()
+	var pe_def = PropertyEditorDef.new()
+	var editor = pe_def.get_property_editor_instance_by_property_def(property_def)
+	if editor:
 		return editor
-	
 	printerr('Unsupported property type: %s, property: %s' % [property_def.type, property])
 #----- Singals -----
 func _on_GraphNode_offset_changed() -> void:

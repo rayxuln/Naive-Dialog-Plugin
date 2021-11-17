@@ -4,10 +4,12 @@ extends Control
 signal value_changed(v)
 
 const PropertyValuePairType := preload('./PropertyValuePair.gd')
+const PropertyValuePairPrefab := preload('./PropertyValuePair.tscn')
+const PropertyEditorDef := preload('./PropertyEditorDef.gd')
 
 onready var list_container := $ScrollContainer/VBoxContainer/VBoxContainer
 
-var property_def:Dictionary
+var property_def
 var list:Array
 
 var item_popup_menu:PopupMenu
@@ -52,11 +54,12 @@ func create_list_item():
 	hbox1.add_child(menu_button)
 	item.set_meta('menu_button', menu_button)
 	
-	var line_edit = LineEdit.new()
-	line_edit.size_flags_horizontal = SIZE_EXPAND_FILL
-	line_edit.size_flags_vertical = SIZE_EXPAND_FILL
-	hbox1.add_child(line_edit)
-	item.set_meta('line_edit', line_edit)
+	var property_value_pair = PropertyValuePairPrefab.instance()
+	hbox1.add_child(property_value_pair)
+	var pe_def = PropertyEditorDef.new()
+	var editor = pe_def.get_property_editor_instance_by_type(get_type_hint())
+	item.set_meta('pair', property_value_pair)
+	item.set_meta('editor', editor)
 	
 	var hbox2 = HBoxContainer.new()
 	hbox1.add_child(hbox2)
@@ -87,9 +90,6 @@ func update_list():
 		var item = create_list_item()
 		list_container.add_child(item)
 		item.set_meta('id', count)
-		var line_edit:LineEdit = item.get_meta('line_edit')
-		line_edit.text = str(v)
-		line_edit.connect('text_changed', self, '_on_item_value_changed', [item])
 		var up_button:Button = item.get_meta('up_button')
 		up_button.connect('pressed', self, '_on_item_up_button_pressed', [item])
 		var down_button:Button = item.get_meta('down_button')
@@ -97,6 +97,16 @@ func update_list():
 		var menu_button:Button = item.get_meta('menu_button')
 		menu_button.connect('pressed', self, '_on_item_menu_button_pressed', [item])
 		
+		var pair:PropertyValuePairType = item.get_meta('pair')
+		pair.set_property(str(item.get_meta('id')))
+		
+		var editor = item.get_meta('editor')
+		if editor:
+			editor.set_value(v)
+			editor.connect('value_changed', self, '_on_item_value_changed', [item])
+			pair.set_editor(editor)
+		else:
+			printerr('Unsupport array type: %s' % get_type_hint())
 		count += 1
 
 func move_up_list_item(id):
@@ -138,6 +148,13 @@ func get_layout_type():
 
 func update_size():
 	rect_size = Vector2.ZERO
+
+func get_type_hint():
+	if property_def != null:
+		if property_def.has('type_hint'):
+			if typeof(property_def.type_hint) == typeof(TYPE_INT):
+				return property_def.type_hint
+	return TYPE_STRING
 #----- Signals -----
 func _on_item_value_changed(v, item):
 	list[item.get_meta('id')] = v

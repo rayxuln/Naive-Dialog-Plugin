@@ -19,7 +19,7 @@ var property_def
 var editor:Control
 
 #----- Methods -----
-func set_property(p, p_def):
+func set_property(p, p_def = null):
 	property = p
 	property_def = p_def
 	property_label.text = str(p)
