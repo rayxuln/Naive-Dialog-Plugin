@@ -1,6 +1,7 @@
 tool
 extends GraphEdit
 
+signal request_paste_node(node_data_list)
 signal request_create_node(data_def_name)
 signal requst_remove_node(node)
 signal requst_resize_node(node, min_size)
@@ -8,6 +9,7 @@ signal request_update_edge_list(node, old_edge_list, new_edge_list)
 signal request_connect_node(from, from_cond_id, to)
 signal request_disconnect_node(from, from_cond_id, to)
 signal node_dragged(node, old_pos, new_pos)
+signal root_node_changed()
 
 const BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH := 'res://addons/naive_dialog_plugin/dialog_graph/data_resource/BuiltinDialogGraphDataDef.gd'
 const GraphNodePrefab := preload('./DialogGraphDataEdit_GraphNode.tscn')
@@ -77,6 +79,7 @@ func set_data(d:DialogGraphData):
 func update_content():
 	update_nodes()
 	update_connections()
+	update_root_node()
 
 func clear_all_nodes():
 	for id in id_node_map.keys():
@@ -93,6 +96,11 @@ func update_nodes():
 func update_connections():
 	clear_connections()
 	create_connections()
+
+func update_root_node():
+	for id in id_node_map.keys():
+		var node:GraphNodeType = id_node_map[id]
+		node.set_as_root(dialog_graph_data.root == id)
 
 func create_connections():
 	for id in dialog_graph_data.id_edge_map.keys():
@@ -172,6 +180,7 @@ func create_node_with_exist_data(data:Dictionary):
 	node.connect('resize_request', self, '_on_node_request_resize', [node])
 	node.connect('dragged', self, '_on_node_dragged', [node])
 	node.connect('request_update_edge_list', self, '_on_node_request_update_edge_list', [node])
+	node.connect('request_set_as_root', self, '_on_node_request_set_as_root', [node])
 	return id
 
 func create_node_with_data(data:Dictionary):
@@ -231,7 +240,8 @@ func _on_popup_menu_id_pressed(id:int):
 				return
 			if not data.has('dialog_graph_node_data_list_tag'):
 				return
-			print('paste %s' % [data])
+#			print('paste %s' % [data])
+			emit_signal('request_paste_node', data.node_data_list)
 
 func _on_node_request_close(node:GraphNodeType):
 	emit_signal('requst_remove_node', node)
@@ -281,12 +291,15 @@ func _on_node_popup_menu_id_pressed(id:int):
 			var node_data_list := []
 			for node in node_list:
 				var data := {
-					'dialog_graph_node_data_list_tag': true,
 					'data': node.data,
 					'edge_list': node.edge_list,
+					'mouse_pos': get_local_mouse_position() + scroll_offset,
 				}
 				node_data_list.append(data)
-			OS.clipboard = var2str(node_data_list)
+			OS.clipboard = var2str({
+				'dialog_graph_node_data_list_tag': true,
+				'node_data_list': node_data_list,
+			})
 		NodePopupMenuId.Delete:
 			var node_list = get_selected_node_list()
 			for n in node_list:
@@ -295,3 +308,20 @@ func _on_node_popup_menu_id_pressed(id:int):
 			var node_list = get_selected_node_list()
 			for n in node_list:
 				n.rect_size = Vector2.ZERO
+
+
+func _on_DialogGraphDataEdit_copy_nodes_request() -> void:
+	_on_node_popup_menu_id_pressed(NodePopupMenuId.Copy)
+
+
+func _on_DialogGraphDataEdit_paste_nodes_request() -> void:
+	popup_local_mouse_position = get_local_mouse_position()
+	_on_popup_menu_id_pressed(PopupMenuId.Paste)
+
+func _on_node_request_set_as_root(v, node):
+	if v:
+		dialog_graph_data.root = node.data.id
+	else:
+		dialog_graph_data.root = -1
+	emit_signal('root_node_changed')
+	update_root_node()

@@ -21,6 +21,7 @@ var new_node_redo_data_stack := []
 var deleted_node_data_stack := []
 var connect_node_stack := []
 var disconnect_node_stack := []
+var paste_node_id_list_stack := []
 
 func _ready() -> void:
 	if the_plugin == null:
@@ -62,6 +63,7 @@ func edit(dialog_graph_data:DialogGraphData):
 	deleted_node_data_stack.clear()
 	connect_node_stack.clear()
 	disconnect_node_stack.clear()
+	paste_node_id_list_stack.clear()
 	update_dialog_graph_data_edit(dialog_graph_data)
 	update_title()
 
@@ -106,7 +108,11 @@ func save_to(path):
 	edit(ResourceLoader.load(path, '', true))
 
 func on_save():
+	if get_dialog_graph_data() == null:
+		return
 	if get_dialog_graph_data().resource_path.empty():
+		if get_dialog_graph_data().id_count < 0:
+			return
 		error('The path of dialog graph data is not set', false, true)
 		return
 	save()
@@ -126,6 +132,29 @@ func error(msg, alert:=true, output:=true):
 		alert_dialog.dialog_text = msg
 		alert_dialog.popup_centered()
 #----- Dos&Undos ------
+func _undo_redo_paste_nodes(node_data_list):
+	var undoredo := the_plugin.get_undo_redo()
+	undoredo.create_action('Paste nodes')
+	undoredo.add_do_method(self, '_do_paste_nodes', node_data_list)
+	undoredo.add_undo_method(self, '_undo_paste_nodes')
+	undoredo.commit_action()
+func _do_paste_nodes(node_data_list):
+	var node_id_list := []
+	for node_data in node_data_list:
+		var data = node_data.data
+		var edge_list = node_data.edge_list
+		var mouse_pos = node_data.mouse_pos
+		var id = dialog_graph_data_edit.create_new_node_at(data, dialog_graph_data_edit.popup_local_mouse_position + dialog_graph_data_edit.scroll_offset + data._editor_.offset - mouse_pos)
+		var node = dialog_graph_data_edit.id_node_map[id]
+		node.edge_list.append_array(edge_list)
+		
+		node_id_list.append(id)
+	paste_node_id_list_stack.push_back(node_id_list)
+func _undo_paste_nodes():
+	var node_id_list = paste_node_id_list_stack.pop_back()
+	for id in node_id_list:
+		_do_remove_node(id, null)
+
 func _undo_redo_create_node(def_type_name):
 	undo_redo_new_node_do_flag = true
 	var undoredo := the_plugin.get_undo_redo()
@@ -171,17 +200,22 @@ func _do_remove_node(node_id, stack):
 		if from_data.to == node.data.id:
 			from_list.append(from)
 			from_data.to = -1
-	stack.push_back({
-		'data': node.data,
-		'edge_list': node.edge_list,
-		'from_list': from_list,
-		'from_edge_map': from_edge_map,
-	})
+	if stack:
+		stack.push_back({
+			'data': node.data,
+			'edge_list': node.edge_list,
+			'from_list': from_list,
+			'from_edge_map': from_edge_map,
+		})
+	if dialog_graph_data_edit.dialog_graph_data.root == node.data.id:
+		dialog_graph_data_edit.dialog_graph_data.root = -1
+		the_plugin.get_editor_interface().get_inspector().refresh()
 	dialog_graph_data_edit.remove_node(node.data.id)
 	# remove this node's edges
 	dialog_graph_data_edit.dialog_graph_data.id_edge_map.erase(node.data.id)
 	
 	dialog_graph_data_edit.update_connections()
+	dialog_graph_data_edit.update_root_node()
 func _undo_remove_node(stack):
 	var node = stack.pop_back()
 	var id = dialog_graph_data_edit.create_node_with_data(node.data)
@@ -222,8 +256,9 @@ func _undo_redo_dragged_node(node_id, old_pos, new_pos):
 	undoredo.add_undo_method(self, '_do_dragged_node', node_id, old_pos)
 	undoredo.commit_action()
 func _do_dragged_node(node_id, offset):
-	var node = dialog_graph_data_edit.id_node_map[node_id]
-	node.offset = offset
+	if dialog_graph_data_edit.id_node_map.has(node_id):
+		var node = dialog_graph_data_edit.id_node_map[node_id]
+		node.offset = offset
 
 
 func _undo_redo_update_edge_list_node(node_id, old_edge_list, new_edge_list):
@@ -394,3 +429,11 @@ func _on_DialogGraphDataEdit_request_connect_node(from, from_cond_id, to) -> voi
 
 func _on_DialogGraphDataEdit_request_disconnect_node(from, from_cond_id, to) -> void:
 	_undo_redo_disconnect_node(from.data.id, from_cond_id, to.data.id)
+
+
+func _on_DialogGraphDataEdit_request_paste_node(node_data_list) -> void:
+	_undo_redo_paste_nodes(node_data_list)
+
+
+func _on_DialogGraphDataEdit_root_node_changed() -> void:
+	the_plugin.get_editor_interface().get_inspector().refresh()

@@ -51,6 +51,7 @@ margin_top = 77.0
 margin_right = 913.0
 margin_bottom = 541.0
 resizable = true
+filters = PoolStringArray( "*.tres" )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -76,14 +77,18 @@ __meta__ = {
 
 [connection signal="visibility_changed" from="." to="." method="_on_DialogGraphEditor_visibility_changed"]
 [connection signal="connection_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_connection_request"]
+[connection signal="copy_nodes_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_copy_nodes_request"]
 [connection signal="disconnection_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_disconnection_request"]
 [connection signal="node_dragged" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_node_dragged"]
+[connection signal="paste_nodes_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_paste_nodes_request"]
 [connection signal="popup_request" from="VBoxContainer/DialogGraphDataEdit" to="VBoxContainer/DialogGraphDataEdit" method="_on_DialogGraphDataEdit_popup_request"]
 [connection signal="request_connect_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_connect_node"]
 [connection signal="request_create_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_create_node"]
 [connection signal="request_disconnect_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_disconnect_node"]
+[connection signal="request_paste_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_paste_node"]
 [connection signal="request_update_edge_list" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_request_update_edge_list"]
 [connection signal="requst_remove_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_remove_node"]
 [connection signal="requst_resize_node" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_requst_resize_node"]
+[connection signal="root_node_changed" from="VBoxContainer/DialogGraphDataEdit" to="." method="_on_DialogGraphDataEdit_root_node_changed"]
 [connection signal="file_selected" from="SaveFileDialog" to="." method="_on_SaveFileDialog_file_selected"]
 [connection signal="confirmed" from="DiscardChangesConfirmationDialog" to="." method="_on_OverrideConfirmationDialog_confirmed"]

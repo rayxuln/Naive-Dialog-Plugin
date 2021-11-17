@@ -35,6 +35,8 @@ func create_runtime(data:DialogGraphData):
 		id_node_map[n_data.id] = node
 	
 	root_id = dialog_graph_data.root
+	if root_id == -1:
+		printerr('The root of dialog graph is not set!')
 	current_node_waiting_advance = false
 
 func clear_runtime():
@@ -49,17 +51,8 @@ func clear_runtime():
 	id_node_map = {}
 
 func create_runtime_node(data:Dictionary):
-	var base_path:String = get_script().resource_path
-	base_path = base_path.get_base_dir()
-	var script_path = '%s/nodes/%s' % [base_path, data.script]
-	var NodeType = load(script_path) as Script
-	var node:DialogGraphNode = NodeType.new()
-	if node == null:
-		printerr('"%s" can\'t be newed' % script_path)
-		return
-	
-	node.create_node(self, data)
-	
+	var node:DialogGraphNode = DialogGraphNode.new()
+	node.create_node(data)
 	return node
 
 func start_dialog():
@@ -89,7 +82,7 @@ func tick():
 	if current_node_waiting_advance:
 		return
 	var data:Dictionary = current_node.data
-	if data.interactable:
+	if data.property_map.interactable:
 		current_node_waiting_advance = true
 		emit_signal('request_advance', self, current_node)
 	else:

@@ -1,8 +1,6 @@
 extends Node
 class_name DialogGraphNode
 
-var runtime
-
 var data:Dictionary
 
 var id
@@ -10,43 +8,48 @@ var id
 func _DialogGraphNode_Type_():
 	pass
 #----- Methods -----
-func create_node(_runtime, _data:Dictionary):
+func create_node(_data:Dictionary):
 	data = _data
-	runtime = _runtime
 	
 	id = data.id
 	name = str(data.id)
 
-func calc_condition():
-	var compiled_condition = Expression.new()
-	var err = compiled_condition.parse(data.condition, runtime.database.keys())
+func calc_condition(runtime):
+	return calc_exp(data.property_map.condition, runtime.database.keys(), runtime.database.values())
+
+func calc_exp(e, keys:=[], values:=[]):
+	if e.empty():
+		return e
+	var compiled = Expression.new()
+	var err = compiled.parse(e, keys)
 	if err != OK:
-		printerr('Can\'t compile condition: %s, err: %s' % [data.condition, compiled_condition.get_error_text()])
+		printerr('Can\'t compile expression: %s, err: %s' % [e, compiled.get_error_text()])
 		return false
-	return compiled_condition.execute(runtime.database.values())
+	return compiled.execute(values)
 
 func get_next(runtime):
-	var edge_list = runtime.get_edge_list(id)
-	if typeof(edge_list) == typeof(id):
-		return edge_list
-	if data.condition.empty():
-		if edge_list == null or ((edge_list is Array or edge_list is Dictionary) and edge_list.empty()):
-			return null
-		if edge_list is Array:
-			return edge_list.front()
-		if edge_list is Dictionary:
-			return edge_list.valuse().front()
-		printerr('Unsupported edge type: %s' % edge_list)
-	var res = calc_condition()
-	if edge_list is Array:
-		if res is int:
-			return edge_list[res]
-		else:
-			printerr('Invalid index: %s, the condition is broken: %s' % [res, data.condition])
-			return
-	if edge_list is Dictionary:
-		return edge_list[res]
-	printerr('Unsupported edge type: %s' % [edge_list])
+	if data.to != -1:
+		return data.to
+	var edge_list:Array = runtime.dialog_graph_data.id_edge_map[data.id]
+	if edge_list.empty():
+		return null
+	if data.property_map.condition.empty():
+		for edge in edge_list:
+			if edge.cond.empty() and edge.to != -1:
+				return edge.to
+		return null
+	var res = calc_condition(runtime)
+	print('cond: %s = %s' % [data.property_map.condition, res])
+	for edge in edge_list:
+		if edge.to == -1:
+			continue
+		if edge.cond.empty():
+			continue
+		var val = calc_exp(edge.cond, runtime.database.keys(), runtime.database.values())
+		print('edge cond: %s = %s' % [edge.cond, val])
+		if res == val:
+			return edge.to
+	return null
 
 
 #----- Signals -----

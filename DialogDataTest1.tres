@@ -1,0 +1,280 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://addons/naive_dialog_plugin/dialog_graph/data_resource/DialogGraphData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+id_count = 5
+databse = {
+"selection": 0
+}
+root = 0
+id_node_map = {
+0: {
+"_editor_": {
+"min_size": Vector2( 426.994, 404 ),
+"offset": Vector2( 100, 120 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 0,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": "你好啊"
+},
+"to": 1
+},
+1: {
+"_editor_": {
+"min_size": Vector2( 467.44, 409 ),
+"offset": Vector2( 580, 100 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 1,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": "我是对白"
+},
+"to": 2
+},
+2: {
+"_editor_": {
+"min_size": Vector2( 420, 390 ),
+"offset": Vector2( 1140, 100 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 2,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": "很高兴看到你"
+},
+"to": 3
+},
+3: {
+"_editor_": {
+"min_size": Vector2( 502, 494 ),
+"offset": Vector2( 1620, 0 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+},
+"text_selection": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "selection",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+},
+"text_selection": {
+"default": [ "这到底是什么？", "我还是不问了吧", "..." ],
+"editor": 0,
+"type": 19,
+"type_hint": 4
+}
+},
+"type": "text_selection"
+},
+"id": 3,
+"property_map": {
+"condition": "selection",
+"interactable": true,
+"text": "你想了解些什么呢？",
+"text_selection": [ "这到底是什么？", "我还是不问了吧", "..." ]
+},
+"to": -1
+},
+4: {
+"_editor_": {
+"min_size": Vector2( 393, 423 ),
+"offset": Vector2( 2180, 60 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 4,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": "随便你吧"
+},
+"to": -1
+},
+5: {
+"_editor_": {
+"min_size": Vector2( 367, 248 ),
+"offset": Vector2( 2180, -200 ),
+"property_list_visible": true,
+"property_map": {
+"text": {
+"visible": true
+}
+}
+},
+"condition": "",
+"def": {
+"property_map": {
+"condition": {
+"default": "",
+"editor": 0,
+"type": 4
+},
+"interactable": {
+"default": true,
+"editor": 0,
+"type": 1
+},
+"text": {
+"default": "",
+"editor": 1,
+"type": 4
+}
+},
+"type": "text"
+},
+"id": 5,
+"property_map": {
+"condition": "",
+"interactable": true,
+"text": "这只是个简单的对话编辑器而已"
+},
+"to": -1
+}
+}
+id_edge_map = {
+0: [  ],
+1: [  ],
+2: [  ],
+3: [ {
+"cond": "0",
+"to": 5
+}, {
+"cond": "1",
+"to": 4
+}, {
+"cond": "2",
+"to": 0
+} ],
+4: [  ],
+5: [  ]
+}

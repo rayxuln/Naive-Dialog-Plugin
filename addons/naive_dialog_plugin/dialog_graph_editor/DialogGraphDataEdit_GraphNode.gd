@@ -2,6 +2,7 @@ tool
 extends GraphNode
 
 signal request_update_edge_list(old_edge_list, new_edge_list)
+signal request_set_as_root(v)
 
 const CondPrefab := preload('./DialogGraphDataEdit_GraphNode_Cond.tscn')
 const CondType := preload('./DialogGraphDataEdit_GraphNode_Cond.gd')
@@ -21,11 +22,12 @@ onready var remove_cond_button := $BottomHBoxContainer/RemoveCondButton
 onready var property_list_scroll_container := $VBoxContainer/ScrollContainer
 onready var property_list_check_button := $VBoxContainer/HBoxContainer/PropertyListCheckButton
 onready var property_list_container := $VBoxContainer/ScrollContainer/VBoxContainer
+onready var root_check_box := $HBoxContainer/RootCheckBox
 
 enum SlotId {
 	In = 0,
 	Out = 0,
-	CondStart = 1,
+	CondStart = 2,
 }
 enum SlotType {
 	In = 0,
@@ -35,12 +37,19 @@ enum SlotType {
 var slot_in_color := Color.white
 var slot_out_color := Color.white
 
+var set_as_root_guard := false
+
 #----- Methods -----
 func set_data(d:Dictionary, e:Array):
 	data = d
 	edge_list = e
 	update_title()
 	update_content()
+
+func set_as_root(v):
+	set_as_root_guard = true
+	root_check_box.pressed = v
+	set_as_root_guard = false
 
 func update_title():
 	title = '%s[%s]' % [data.def.type, data.id]
@@ -267,3 +276,9 @@ func _on_property_visible_check_button_toggled(v, pair:PropertyValuePairType):
 	if not data._editor_.property_map.has(pair.property):
 		data._editor_.property_map[pair.property] = {}
 	data._editor_.property_map[pair.property].visible = v
+
+
+
+func _on_RootCheckBox_toggled(button_pressed: bool) -> void:
+	if not set_as_root_guard:
+		emit_signal('request_set_as_root', button_pressed)
