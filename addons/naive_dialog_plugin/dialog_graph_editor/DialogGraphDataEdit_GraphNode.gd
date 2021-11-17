@@ -181,7 +181,7 @@ func update_property_list():
 		if editor:
 			var pair = PropertyValuePairPrefab.instance()
 			property_list_container.add_child(pair)
-			pair.set_property(p)
+			pair.set_property(p, data.def.property_map[p])
 			pair.set_editor(editor)
 			pair.connect('visible_check_button_toggled', self, '_on_property_visible_check_button_toggled', [pair])
 			if pm.has(p):

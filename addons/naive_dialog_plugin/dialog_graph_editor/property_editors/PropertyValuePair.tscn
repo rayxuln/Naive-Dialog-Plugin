@@ -1,47 +1,66 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://addons/naive_dialog_plugin/dialog_graph_editor/property_editors/PropertyValuePair.gd" type="Script" id=1]
 
-[node name="PropertyValuePair" type="VBoxContainer"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -150.0
-margin_top = -18.5
-margin_right = 150.0
-margin_bottom = 18.5
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 3.0
+content_margin_right = 3.0
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color( 0.14902, 0.172549, 0.231373, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0980392, 0.113725, 0.152941, 1 )
+
+[node name="PropertyValuePair" type="PanelContainer"]
+margin_top = 28.0
+margin_right = 300.0
+margin_bottom = 42.0
 size_flags_horizontal = 3
+custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="."]
-margin_right = 300.0
-margin_bottom = 37.0
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 297.0
+margin_bottom = 27.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+margin_right = 294.0
+margin_bottom = 24.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PropertyLabel" type="Label" parent="HBoxContainer2"]
-margin_right = 148.0
-margin_bottom = 37.0
+[node name="PropertyLabel" type="Label" parent="VBoxContainer/HBoxContainer2"]
+margin_right = 145.0
+margin_bottom = 24.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 valign = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer2"]
-margin_left = 152.0
-margin_right = 300.0
-margin_bottom = 37.0
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+margin_left = 149.0
+margin_right = 294.0
+margin_bottom = 24.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="VisibleCheckButton" type="CheckButton" parent="HBoxContainer2/HBoxContainer"]
+[node name="VisibleCheckButton" type="CheckButton" parent="VBoxContainer/HBoxContainer2/HBoxContainer"]
 visible = false
 margin_right = 148.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 text = "Show"
 
-[connection signal="toggled" from="HBoxContainer2/HBoxContainer/VisibleCheckButton" to="." method="_on_VisibleCheckButton_toggled"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer2/HBoxContainer/VisibleCheckButton" to="." method="_on_VisibleCheckButton_toggled"]
