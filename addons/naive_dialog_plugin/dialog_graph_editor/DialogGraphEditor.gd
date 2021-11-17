@@ -15,6 +15,7 @@ onready var discard_changes_confirmation_dialog := $DiscardChangesConfirmationDi
 
 var saved_undoredo_version:int
 
+var undo_redo_new_node_do_flag := false
 var new_node_data_stack := []
 var new_node_redo_data_stack := []
 var deleted_node_data_stack := []
@@ -126,13 +127,15 @@ func error(msg, alert:=true, output:=true):
 		alert_dialog.popup_centered()
 #----- Dos&Undos ------
 func _undo_redo_create_node(def_type_name):
+	undo_redo_new_node_do_flag = true
 	var undoredo := the_plugin.get_undo_redo()
 	undoredo.create_action('Create \'%s\' Node' % def_type_name)
 	undoredo.add_do_method(self, '_do_create_node', def_type_name)
 	undoredo.add_undo_method(self, '_undo_create_node')
 	undoredo.commit_action()
 func _do_create_node(def_type_name):
-	if new_node_redo_data_stack.empty():
+	if new_node_redo_data_stack.empty() or undo_redo_new_node_do_flag:
+		undo_redo_new_node_do_flag = false
 		var id = dialog_graph_data_edit.create_new_node_at(dialog_graph_data_edit.gen_data_from_data_def_name(def_type_name), dialog_graph_data_edit.popup_local_mouse_position + dialog_graph_data_edit.scroll_offset)
 		new_node_data_stack.push_back(id)
 	else:
