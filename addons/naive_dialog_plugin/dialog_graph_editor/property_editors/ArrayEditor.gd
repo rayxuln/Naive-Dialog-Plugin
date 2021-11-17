@@ -20,14 +20,30 @@ enum ItemPopupMenuId {
 	Remove = 0,
 	InsertAbove = 1,
 	InsertBelow = 2,
+	TypeCanditateStart = 1000,
 }
 var item_popup_menu_item_id := -1
+var type_canditate_map := {}
 
 func _ready() -> void:
+	add_type_canditate(TYPE_STRING, 'String')
+	add_type_canditate(TYPE_BOOL, 'Bool')
+	add_type_canditate(TYPE_INT, 'Int')
+	add_type_canditate(TYPE_REAL, 'Float')
+	add_type_canditate(TYPE_ARRAY, 'Array')
+	add_type_canditate(TYPE_DICTIONARY, 'Dictionary')
 	create_item_popup_menu()
 #----- Methods -----
+func add_type_canditate(type:int, type_name:String):
+	type_canditate_map[type] = {'name': type_name, 'id': ItemPopupMenuId.TypeCanditateStart + type}
+
 func create_item_popup_menu():
 	item_popup_menu = PopupMenu.new()
+	# add supported type
+	for type in type_canditate_map:
+		item_popup_menu.add_item(type_canditate_map[type].name, type_canditate_map[type].id)
+	
+	item_popup_menu.add_separator()
 	item_popup_menu.add_item(item_popup_menu_remove_name, ItemPopupMenuId.Remove)
 	item_popup_menu.add_separator()
 	item_popup_menu.add_item(item_popup_menu_insert_above_name, ItemPopupMenuId.InsertAbove)
@@ -35,7 +51,7 @@ func create_item_popup_menu():
 	item_popup_menu.connect('id_pressed', self, '_on_item_popup_menu_id_pressed')
 	add_child(item_popup_menu)
 
-func create_list_item():
+func create_list_item(v):
 	var item = PanelContainer.new()
 	item.size_flags_horizontal = SIZE_EXPAND_FILL
 	item.size_flags_vertical = SIZE_EXPAND_FILL
@@ -49,6 +65,7 @@ func create_list_item():
 	item.add_child(hbox1)
 	
 	var menu_button = Button.new()
+	menu_button.size_flags_vertical = 0
 	menu_button.flat = true
 	menu_button.text = '◎'
 	hbox1.add_child(menu_button)
@@ -57,7 +74,7 @@ func create_list_item():
 	var property_value_pair = PropertyValuePairPrefab.instance()
 	hbox1.add_child(property_value_pair)
 	var pe_def = PropertyEditorDef.new()
-	var editor = pe_def.get_property_editor_instance_by_type(get_type_hint())
+	var editor = pe_def.get_property_editor_instance_by_type(typeof(v))
 	item.set_meta('pair', property_value_pair)
 	item.set_meta('editor', editor)
 	
@@ -65,11 +82,13 @@ func create_list_item():
 	hbox1.add_child(hbox2)
 	
 	var up_button = Button.new()
+	up_button.size_flags_vertical = 0
 	up_button.text = '↑'
 	up_button.flat = true
 	hbox2.add_child(up_button)
 	
 	var down_button = Button.new()
+	down_button.size_flags_vertical = 0
 	down_button.text = '↓'
 	down_button.flat = true
 	hbox2.add_child(down_button)
@@ -87,7 +106,7 @@ func update_list():
 	clear_list_item()
 	var count = 0
 	for v in list:
-		var item = create_list_item()
+		var item = create_list_item(v)
 		list_container.add_child(item)
 		item.set_meta('id', count)
 		var up_button:Button = item.get_meta('up_button')
@@ -102,11 +121,11 @@ func update_list():
 		
 		var editor = item.get_meta('editor')
 		if editor:
-			editor.set_value(v)
 			editor.connect('value_changed', self, '_on_item_value_changed', [item])
 			pair.set_editor(editor)
+			editor.set_value(v)
 		else:
-			printerr('Unsupport array type: %s' % get_type_hint())
+			printerr('Unsupport array type: %s' % typeof(v))
 		count += 1
 
 func move_up_list_item(id):
@@ -149,12 +168,9 @@ func get_layout_type():
 func update_size():
 	rect_size = Vector2.ZERO
 
-func get_type_hint():
-	if property_def != null:
-		if property_def.has('type_hint'):
-			if typeof(property_def.type_hint) == typeof(TYPE_INT):
-				return property_def.type_hint
-	return TYPE_STRING
+func get_empty_value_by_type(type:int):
+	var def := DialogGraphDataDef.new()
+	return def.get_empty_value_by_type(type)
 #----- Signals -----
 func _on_item_value_changed(v, item):
 	list[item.get_meta('id')] = v
@@ -179,6 +195,12 @@ func _on_item_popup_menu_id_pressed(id:int):
 			add_list_item_at(item_popup_menu_item_id)
 		ItemPopupMenuId.InsertBelow:
 			add_list_item_at(item_popup_menu_item_id+1)
+	if id >= ItemPopupMenuId.TypeCanditateStart:
+		var new_type = id - ItemPopupMenuId.TypeCanditateStart
+		var val = get_empty_value_by_type(new_type)
+		list[item_popup_menu_item_id] = val
+		update_list()
+	
 	item_popup_menu_item_id = -1
 
 func _on_item_menu_button_pressed(item):
