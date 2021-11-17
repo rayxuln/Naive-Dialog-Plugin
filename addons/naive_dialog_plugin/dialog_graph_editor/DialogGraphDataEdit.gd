@@ -6,6 +6,7 @@ signal requst_remove_node(node)
 signal requst_resize_node(node, min_size)
 signal request_update_edge_list(node, old_edge_list, new_edge_list)
 signal request_connect_node(from, from_cond_id, to)
+signal request_disconnect_node(from, from_cond_id, to)
 signal node_dragged(node, old_pos, new_pos)
 
 const BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH := 'res://addons/naive_dialog_plugin/dialog_graph/data_resource/BuiltinDialogGraphDataDef.gd'
@@ -94,6 +95,12 @@ func connect_edge(from:GraphNodeType, from_cond_id, to:GraphNodeType):
 		from.data.to = to.data.id
 	else:
 		from.edge_list[from_cond_id].to = to.data.id
+
+func disconnect_edge(from:GraphNodeType, from_cond_id, to:GraphNodeType):
+	if from_cond_id == -1:
+		from.data.to = -1
+	else:
+		from.edge_list[from_cond_id].to = -1
 
 func get_data_def_name_list():
 	var def_script = load(BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH)
@@ -202,3 +209,16 @@ func _on_DialogGraphDataEdit_connection_request(from: String, from_slot: int, to
 		var start_id = from_node.get_cond_start_slot()
 		from_cond_id = from_slot - start_id
 	emit_signal('request_connect_node', from_node, from_cond_id, to_node)
+
+
+func _on_DialogGraphDataEdit_disconnection_request(from: String, from_slot: int, to: String, to_slot: int) -> void:
+	var from_node:GraphNodeType = get_node(from)
+	var to_node:GraphNodeType = get_node(to)
+	var from_slot_type = from_node.get_slot_type_right(from_slot)
+	if not from_slot_type == GraphNodeType.SlotType.Out:
+		return
+	var from_cond_id = -1
+	if not from_node.is_slot_enabled_right(GraphNodeType.SlotId.Out):
+		var start_id = from_node.get_cond_start_slot()
+		from_cond_id = from_slot - start_id
+	emit_signal('request_disconnect_node', from_node, from_cond_id, to_node)

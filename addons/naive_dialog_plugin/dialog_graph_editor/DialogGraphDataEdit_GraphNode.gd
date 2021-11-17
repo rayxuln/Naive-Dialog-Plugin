@@ -59,6 +59,11 @@ func update_content():
 	update_property_list()
 	update_size()
 
+func update_cond_text():
+	for c in cond_list:
+		c.get_line_edit().text = edge_list[c.id].cond
+		
+
 func create_cond(id):
 	var n = CondPrefab.instance()
 	n.id = id

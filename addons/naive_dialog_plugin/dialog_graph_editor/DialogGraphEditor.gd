@@ -19,6 +19,7 @@ var new_node_data_stack := []
 var new_node_redo_data_stack := []
 var deleted_node_data_stack := []
 var connect_node_stack := []
+var disconnect_node_stack := []
 
 func _ready() -> void:
 	if the_plugin == null:
@@ -59,6 +60,7 @@ func edit(dialog_graph_data:DialogGraphData):
 	new_node_redo_data_stack.clear()
 	deleted_node_data_stack.clear()
 	connect_node_stack.clear()
+	disconnect_node_stack.clear()
 	update_dialog_graph_data_edit(dialog_graph_data)
 	update_title()
 
@@ -266,6 +268,38 @@ func _undo_connect_node(from_id, from_cond_id, to_id):
 	from.data.to = data.to
 	from.edge_list.clear()
 	from.edge_list.append_array(data.edge_list)
+	from.update_cond_text()
+	dialog_graph_data_edit.update_connections()
+
+func _undo_redo_disconnect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var undoredo := the_plugin.get_undo_redo()
+	undoredo.create_action('Disconnect Node: from \'%s[%s]\' to \'%s[%s]\', cond: \'%s\'' % [from.data.def.type, from.data.id, to.data.def.type, to.data.id, (from.edge_list[from_cond_id].cond if from_cond_id != -1 else 'No Cond')])
+	undoredo.add_do_method(self, '_do_disconnect_node', from_id, from_cond_id, to_id)
+	undoredo.add_undo_method(self, '_undo_disconnect_node', from_id, from_cond_id, to_id)
+	undoredo.commit_action()
+func _do_disconnect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var data = {
+		'to': from.data.to,
+		'edge_list': from.edge_list.duplicate(true),
+	}
+	disconnect_node_stack.append(data)
+	dialog_graph_data_edit.disconnect_edge(from, from_cond_id, to)
+	dialog_graph_data_edit.update_connections()
+func _undo_disconnect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var data = disconnect_node_stack.pop_back()
+	from.data.to = data.to
+	from.edge_list.clear()
+	from.edge_list.append_array(data.edge_list)
+	from.update_cond_text()
 	dialog_graph_data_edit.update_connections()
 #----- Signals -----
 func _on_file_menu_id_pressed(id:int):
@@ -353,3 +387,7 @@ func _on_DialogGraphDataEdit_request_update_edge_list(node, old_edge_list, new_e
 
 func _on_DialogGraphDataEdit_request_connect_node(from, from_cond_id, to) -> void:
 	_undo_redo_connect_node(from.data.id, from_cond_id, to.data.id)
+
+
+func _on_DialogGraphDataEdit_request_disconnect_node(from, from_cond_id, to) -> void:
+	_undo_redo_disconnect_node(from.data.id, from_cond_id, to.data.id)
