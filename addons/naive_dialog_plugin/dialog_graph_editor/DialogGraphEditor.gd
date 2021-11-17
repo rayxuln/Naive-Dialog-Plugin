@@ -16,7 +16,9 @@ onready var discard_changes_confirmation_dialog := $DiscardChangesConfirmationDi
 var saved_undoredo_version:int
 
 var new_node_data_stack := []
+var new_node_redo_data_stack := []
 var deleted_node_data_stack := []
+var connect_node_stack := []
 
 func _ready() -> void:
 	if the_plugin == null:
@@ -54,7 +56,9 @@ func choose_save_path():
 func edit(dialog_graph_data:DialogGraphData):
 	saved_undoredo_version = the_plugin.get_undo_redo().get_version()
 	new_node_data_stack.clear()
+	new_node_redo_data_stack.clear()
 	deleted_node_data_stack.clear()
+	connect_node_stack.clear()
 	update_dialog_graph_data_edit(dialog_graph_data)
 	update_title()
 
@@ -126,26 +130,74 @@ func _undo_redo_create_node(def_type_name):
 	undoredo.add_undo_method(self, '_undo_create_node')
 	undoredo.commit_action()
 func _do_create_node(def_type_name):
-	var id = dialog_graph_data_edit.create_new_node_at(dialog_graph_data_edit.gen_data_from_data_def_name(def_type_name), dialog_graph_data_edit.popup_local_mouse_position + dialog_graph_data_edit.scroll_offset)
-	new_node_data_stack.push_back(dialog_graph_data_edit.id_node_map[id].data)
+	if new_node_redo_data_stack.empty():
+		var id = dialog_graph_data_edit.create_new_node_at(dialog_graph_data_edit.gen_data_from_data_def_name(def_type_name), dialog_graph_data_edit.popup_local_mouse_position + dialog_graph_data_edit.scroll_offset)
+		new_node_data_stack.push_back(id)
+	else:
+		new_node_data_stack.push_back(new_node_redo_data_stack.back().data.id)
+		_undo_remove_node(new_node_redo_data_stack)
 func _undo_create_node():
-	var data = new_node_data_stack.pop_back()
-	dialog_graph_data_edit.remove_node(data.id)
+	var id = new_node_data_stack.pop_back()
+	_do_remove_node(id, new_node_redo_data_stack)
 
-func _undo_redo_remove_node(node_data):
+func _undo_redo_remove_node(node_id):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
 	var undoredo := the_plugin.get_undo_redo()
-	undoredo.create_action('Remove Node: \'%s\' - [%s]' % [node_data.def.type, node_data.id])
-	undoredo.add_do_method(self, '_do_remove_node', node_data)
-	undoredo.add_undo_method(self, '_undo_remove_node')
+	undoredo.create_action('Remove Node: \'%s\' - [%s]' % [node.data.def.type, node.data.id])
+	undoredo.add_do_method(self, '_do_remove_node', node_id, deleted_node_data_stack)
+	undoredo.add_undo_method(self, '_undo_remove_node', deleted_node_data_stack)
 	undoredo.commit_action()
-func _do_remove_node(node_data):
-	deleted_node_data_stack.push_back(node_data)
-	dialog_graph_data_edit.remove_node(node_data.id)
-func _undo_remove_node():
-	var node_data = deleted_node_data_stack.pop_back()
-	dialog_graph_data_edit.create_node_with_data(node_data)
+func _do_remove_node(node_id, stack):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
+	var from_list := []
+	var from_edge_map := {}
+	# change from nodes' edges
+	for from in dialog_graph_data_edit.dialog_graph_data.id_edge_map.keys():
+		var from_edge_list:Array =  dialog_graph_data_edit.dialog_graph_data.id_edge_map[from]
+		var count := 0
+		for edge in from_edge_list:
+			if edge.to == node.data.id:
+				if not from_edge_map.has(from):
+					from_edge_map[from] = from_edge_list.duplicate(true)
+				edge.to = -1
+			count += 1
+	for from in dialog_graph_data_edit.dialog_graph_data.id_node_map.keys():
+		var from_data = dialog_graph_data_edit.dialog_graph_data.id_node_map[from]
+		if from_data.to == node.data.id:
+			from_list.append(from)
+			from_data.to = -1
+	stack.push_back({
+		'data': node.data,
+		'edge_list': node.edge_list,
+		'from_list': from_list,
+		'from_edge_map': from_edge_map,
+	})
+	dialog_graph_data_edit.remove_node(node.data.id)
+	# remove this node's edges
+	dialog_graph_data_edit.dialog_graph_data.id_edge_map.erase(node.data.id)
+	
+	dialog_graph_data_edit.update_connections()
+func _undo_remove_node(stack):
+	var node = stack.pop_back()
+	var id = dialog_graph_data_edit.create_node_with_data(node.data)
+	var new_node = dialog_graph_data_edit.id_node_map[id]
+	
+	# add this node's edge
+	new_node.edge_list.append_array(node.edge_list)
+	
+	# change from nodes' edge
+	for from in node.from_list:
+		var from_node = dialog_graph_data_edit.id_node_map[from]
+		from_node.data.to = id
+	for from in node.from_edge_map.keys():
+		var from_node = dialog_graph_data_edit.id_node_map[id]
+		from_node.edge_list.clear()
+		from_node.edge_list.append_array(node.from_edge_map[from])
+	
+	dialog_graph_data_edit.update_connections()
 
-func _undo_redo_resize_node(node, min_size):
+func _undo_redo_resize_node(node_id, min_size):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
 	node.rect_size = min_size
 #	var undoredo := the_plugin.get_undo_redo()
 #	undoredo.create_action('Resize Node: \'%s\' - [%s]' % [node.data.def.type, node.data.id])
@@ -157,23 +209,64 @@ func _undo_redo_resize_node(node, min_size):
 #func _undo_resize_node(node, min_size):
 #	node.rect_min_size = min_size
 
-func _undo_redo_dragged_node(node, old_pos, new_pos):
+func _undo_redo_dragged_node(node_id, old_pos, new_pos):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
 	var undoredo := the_plugin.get_undo_redo()
 	undoredo.create_action('Dragged Node: \'%s\' - [%s]' % [node.data.def.type, node.data.id])
-	undoredo.add_do_property(node, 'offset', new_pos)
-	undoredo.add_undo_property(node, 'offset', old_pos)
+	undoredo.add_do_method(self, '_do_dragged_node', node_id, new_pos)
+	undoredo.add_undo_method(self, '_do_dragged_node', node_id, old_pos)
 	undoredo.commit_action()
+func _do_dragged_node(node_id, offset):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
+	node.offset = offset
 
-func _undo_redo_update_edge_list_node(node, old_edge_list, new_edge_list):
+
+func _undo_redo_update_edge_list_node(node_id, old_edge_list, new_edge_list):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
+	var old_to = node.data.to if old_edge_list.empty() else -1
+	var new_to = node.data.to if new_edge_list.empty() else -1
 	var undoredo := the_plugin.get_undo_redo()
 	undoredo.create_action('Node: \'%s\' - [%s] => change condition list' % [node.data.def.type, node.data.id])
-	undoredo.add_do_method(self, '_do_update_edge_list_node', node, new_edge_list)
-	undoredo.add_undo_method(self, '_do_update_edge_list_node', node, old_edge_list)
+	undoredo.add_do_method(self, '_do_update_edge_list_node', node_id, new_edge_list, new_to)
+	undoredo.add_undo_method(self, '_do_update_edge_list_node', node_id, old_edge_list, old_to)
 	undoredo.commit_action()
-func _do_update_edge_list_node(node, list):
+func _do_update_edge_list_node(node_id, list, to):
+	var node = dialog_graph_data_edit.id_node_map[node_id]
 	node.edge_list.clear()
 	node.edge_list.append_array(list)
+	node.data.to = to
 	node.update_content()
+	dialog_graph_data_edit.update_connections()
+
+func _undo_redo_connect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var undoredo := the_plugin.get_undo_redo()
+	undoredo.create_action('Connect Node: from \'%s[%s]\' to \'%s[%s]\', cond: \'%s\'' % [from.data.def.type, from.data.id, to.data.def.type, to.data.id, (from.edge_list[from_cond_id].cond if from_cond_id != -1 else 'No Cond')])
+	undoredo.add_do_method(self, '_do_connect_node', from_id, from_cond_id, to_id)
+	undoredo.add_undo_method(self, '_undo_connect_node', from_id, from_cond_id, to_id)
+	undoredo.commit_action()
+func _do_connect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var data = {
+		'to': from.data.to,
+		'edge_list': from.edge_list.duplicate(true),
+	}
+	connect_node_stack.append(data)
+	dialog_graph_data_edit.connect_edge(from, from_cond_id, to)
+	dialog_graph_data_edit.update_connections()
+func _undo_connect_node(from_id, from_cond_id, to_id):
+	var from = dialog_graph_data_edit.id_node_map[from_id]
+	var to = dialog_graph_data_edit.id_node_map[to_id]
+	
+	var data = connect_node_stack.pop_back()
+	from.data.to = data.to
+	from.edge_list.clear()
+	from.edge_list.append_array(data.edge_list)
+	dialog_graph_data_edit.update_connections()
 #----- Signals -----
 func _on_file_menu_id_pressed(id:int):
 	match id:
@@ -235,16 +328,16 @@ func _on_undoredo_version_changed():
 	update_title()
 
 
-func _on_DialogGraphDataEdit_requst_remove_node(node_data) -> void:
-	_undo_redo_remove_node(node_data)
+func _on_DialogGraphDataEdit_requst_remove_node(node) -> void:
+	_undo_redo_remove_node(node.data.id)
 
 
 func _on_DialogGraphDataEdit_requst_resize_node(node, min_size) -> void:
-	_undo_redo_resize_node(node, min_size)
+	_undo_redo_resize_node(node.data.id, min_size)
 
 
 func _on_DialogGraphDataEdit_node_dragged(node, old_pos, new_pos) -> void:
-	_undo_redo_dragged_node(node, old_pos, new_pos)
+	_undo_redo_dragged_node(node.data.id, old_pos, new_pos)
 
 
 func _on_OverrideConfirmationDialog_confirmed() -> void:
@@ -254,4 +347,9 @@ func _on_OverrideConfirmationDialog_confirmed() -> void:
 
 
 func _on_DialogGraphDataEdit_request_update_edge_list(node, old_edge_list, new_edge_list) -> void:
-	_undo_redo_update_edge_list_node(node, old_edge_list, new_edge_list)
+	_undo_redo_update_edge_list_node(node.data.id, old_edge_list, new_edge_list)
+
+
+
+func _on_DialogGraphDataEdit_request_connect_node(from, from_cond_id, to) -> void:
+	_undo_redo_connect_node(from.data.id, from_cond_id, to.data.id)

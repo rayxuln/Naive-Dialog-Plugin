@@ -89,10 +89,10 @@ func remove_cond(id):
 		count += 1
 
 func append_empty_cond():
-	var list = edge_list.duplicate()
+	var list = edge_list.duplicate(true)
 	var edge = gen_edge()
 	list.append(edge)
-	emit_signal('request_update_edge_list', edge_list.duplicate(), list)
+	emit_signal('request_update_edge_list', edge_list.duplicate(true), list)
 
 func remove_last_cond():
 	if cond_list.empty():
@@ -100,9 +100,9 @@ func remove_last_cond():
 	remove_cond_by_id(cond_list.size()-1)
 
 func remove_cond_by_id(id):
-	var list = edge_list.duplicate()
+	var list = edge_list.duplicate(true)
 	list.remove(id)
-	emit_signal('request_update_edge_list', edge_list.duplicate(), list)
+	emit_signal('request_update_edge_list', edge_list.duplicate(true), list)
 
 func gen_edge(cond:='', to:=-1):
 	return {
@@ -178,20 +178,20 @@ func update_property_list():
 func move_cond_up(id):
 	if id == 0:
 		return
-	var list = edge_list.duplicate()
+	var list = edge_list.duplicate(true)
 	var edge = list[id]
 	list.remove(id)
 	list.insert(id-1, edge)
-	emit_signal('request_update_edge_list', edge_list.duplicate(), list)
+	emit_signal('request_update_edge_list', edge_list.duplicate(true), list)
 
 func move_cond_down(id):
 	if id == edge_list.size()-1:
 		return
-	var list = edge_list.duplicate()
+	var list = edge_list.duplicate(true)
 	var edge = list[id]
 	list.remove(id)
 	list.insert(id+1, edge)
-	emit_signal('request_update_edge_list', edge_list.duplicate(), list)
+	emit_signal('request_update_edge_list', edge_list.duplicate(true), list)
 
 func get_property_editor_prefab_by_property(property:String):
 	var property_def:Dictionary = data.def.property_map[property]
@@ -200,6 +200,13 @@ func get_property_editor_prefab_by_property(property:String):
 	if editor:
 		return editor
 	printerr('Unsupported property type: %s, property: %s' % [property_def.type, property])
+
+func get_cond_start_slot():
+	var start_id = 0
+	for i in SlotId.CondStart:
+		if is_slot_enabled_right(i):
+			start_id += 1
+	return start_id
 #----- Singals -----
 func _on_GraphNode_offset_changed() -> void:
 	if not data.has('_editor_'):

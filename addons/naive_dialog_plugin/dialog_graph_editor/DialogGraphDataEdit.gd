@@ -2,9 +2,10 @@ tool
 extends GraphEdit
 
 signal request_create_node(data_def_name)
-signal requst_remove_node(node_data)
+signal requst_remove_node(node)
 signal requst_resize_node(node, min_size)
 signal request_update_edge_list(node, old_edge_list, new_edge_list)
+signal request_connect_node(from, from_cond_id, to)
 signal node_dragged(node, old_pos, new_pos)
 
 const BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH := 'res://addons/naive_dialog_plugin/dialog_graph/data_resource/BuiltinDialogGraphDataDef.gd'
@@ -46,9 +47,8 @@ func set_data(d:DialogGraphData):
 	update_content()
 
 func update_content():
-	clear_all_nodes()
-	for n_data in dialog_graph_data.id_node_map.values():
-		create_node_with_exist_data(n_data)
+	update_nodes()
+	update_connections()
 
 func clear_all_nodes():
 	for id in id_node_map.keys():
@@ -56,6 +56,44 @@ func clear_all_nodes():
 		remove_child(n)
 		n.free()
 	id_node_map.clear()
+
+func update_nodes():
+	clear_all_nodes()
+	for n_data in dialog_graph_data.id_node_map.values():
+		create_node_with_exist_data(n_data)
+
+func update_connections():
+	clear_connections()
+	create_connections()
+
+func create_connections():
+	for id in dialog_graph_data.id_edge_map.keys():
+		var node_data:Dictionary = dialog_graph_data.id_node_map[id]
+		
+		if node_data.to != -1:
+			connect_dialog_graph_node(id_node_map[id], -1, id_node_map[node_data.to])
+			continue
+		
+		var count := 0
+		for edge in dialog_graph_data.id_edge_map[id]:
+			var from = id_node_map[id]
+			if edge.to != -1:
+				var to = id_node_map[edge.to]
+				connect_dialog_graph_node(from, count, to) # otherwise use the default
+			
+			count += 1
+
+func connect_dialog_graph_node(from:GraphNodeType, from_cond_id, to:GraphNodeType):
+	var from_slot = GraphNodeType.SlotId.Out
+	if from_cond_id != -1:
+		from_slot = from_cond_id + from.get_cond_start_slot()
+	connect_node(from.name, from_slot, to.name, GraphNodeType.SlotId.In)
+
+func connect_edge(from:GraphNodeType, from_cond_id, to:GraphNodeType):
+	if from_cond_id == -1:
+		from.data.to = to.data.id
+	else:
+		from.edge_list[from_cond_id].to = to.data.id
 
 func get_data_def_name_list():
 	var def_script = load(BUILTIN_DIALOG_GRAPH_DATA_DEF_PATH)
@@ -140,7 +178,7 @@ func _on_popup_new_menu_id_pressed(id:int):
 #	create_new_node_at(gen_data_from_data_def_name(def_type_name), popup_local_mouse_position + scroll_offset)
 
 func _on_node_request_close(node:GraphNodeType):
-	emit_signal('requst_remove_node', node.data)
+	emit_signal('requst_remove_node', node)
 
 func _on_node_request_resize(min_size:Vector2, node:GraphNodeType):
 	emit_signal('requst_resize_node', node, min_size)
@@ -150,3 +188,17 @@ func _on_node_dragged(old_pos, new_pos, node):
 
 func _on_node_request_update_edge_list(old_edge_list, new_edge_list, node):
 	emit_signal('request_update_edge_list', node, old_edge_list, new_edge_list)
+
+
+func _on_DialogGraphDataEdit_connection_request(from: String, from_slot: int, to: String, to_slot: int) -> void:
+#	print('connection request from: %s, from_slot: %s, to: %s, to_slot: %s' % [from, from_slot, to, to_slot])
+	var from_node:GraphNodeType = get_node(from)
+	var to_node:GraphNodeType = get_node(to)
+	var from_slot_type = from_node.get_slot_type_right(from_slot)
+	if not from_slot_type == GraphNodeType.SlotType.Out:
+		return
+	var from_cond_id = -1
+	if not from_node.is_slot_enabled_right(GraphNodeType.SlotId.Out):
+		var start_id = from_node.get_cond_start_slot()
+		from_cond_id = from_slot - start_id
+	emit_signal('request_connect_node', from_node, from_cond_id, to_node)

@@ -118,6 +118,7 @@ func gen_base_data():
 		'def': {},
 		'id': -1,
 		'condition': '',
+		'to': -1,
 		'property_map': {},
 	}
 
